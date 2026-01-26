@@ -73,12 +73,21 @@ export default function Onboarding({ onComplete }: Props) {
     return calculateTargetCalories(tdee, formData.goal ?? 'MAINTAIN', bmi);
   }, [formData, bmi, weight, height, age]);
 
-  // Pre-fill name from user store if available
+  // Pre-fill form from user store if available
   useEffect(() => {
-    if (user?.firstName) {
-      setFormData(prev => ({ ...prev, firstName: user.firstName || '' }));
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: user.firstName || prev.firstName,
+        gender: user.gender || prev.gender,
+        age: user.age ? String(user.age) : prev.age,
+        height: user.heightCm ? String(user.heightCm) : prev.height,
+        weight: user.weightKg ? String(user.weightKg) : prev.weight,
+        activity: user.activity || prev.activity,
+        goal: user.goal as any || prev.goal
+      }));
     }
-  }, [user?.firstName]);
+  }, [user?.id]);
 
   const isValidStep0 = formData.firstName.trim().length > 0 && formData.age !== '' && formData.height !== '' && formData.weight !== '' && age > 0 && height > 0 && weight > 0;
   const isValidStep2 = !!formData.goal;
@@ -146,6 +155,16 @@ export default function Onboarding({ onComplete }: Props) {
 
     try {
       // Send all profile data
+      console.log('Sending profile data:', {
+        firstName: formData.firstName,
+        gender: formData.gender,
+        age,
+        heightCm: height,
+        weightKg: weight,
+        activity: formData.activity,
+        goal: formData.goal ?? 'MAINTAIN'
+      });
+      
       await updateProfile(user.id, {
         firstName: formData.firstName,
         gender: formData.gender,
@@ -157,7 +176,8 @@ export default function Onboarding({ onComplete }: Props) {
       });
 
       // Save calculated calorie goal
-      await updateCalorieGoal(user.id, recommended);
+      const goalRes = await updateCalorieGoal(user.id, recommended);
+      console.log('Updated calorie goal:', goalRes);
 
       // Signal completion - App.tsx will fetch fresh user data
       setTimeout(() => onComplete(recommended), 800);

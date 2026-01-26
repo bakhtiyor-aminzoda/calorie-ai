@@ -99,6 +99,7 @@ function AppContent() {
       try {
         // Fetch updated user profile from backend to get all new data
         const updatedUser = await getProfile(user.id);
+        console.log('Onboarding complete, updated user:', updatedUser);
         setUser(updatedUser);
         setIsOnboarding(false);
         const { meals, totals } = await getTodayMeals(user.id);
