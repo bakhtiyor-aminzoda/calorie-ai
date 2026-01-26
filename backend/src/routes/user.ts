@@ -7,7 +7,22 @@ const prisma = new PrismaClient();
 router.get('/:userId', async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.params.userId } });
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) {
+      console.log(`[GET /user/${req.params.userId}] User not found`);
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    console.log(`[GET /user/${req.params.userId}] User data:`, {
+      id: user.id,
+      firstName: user.firstName,
+      age: user.age,
+      gender: user.gender,
+      heightCm: user.heightCm,
+      weightKg: user.weightKg,
+      activity: user.activity,
+      goal: user.goal,
+      dailyCalorieGoal: user.dailyCalorieGoal
+    });
 
     res.json({
       user: {
@@ -28,6 +43,7 @@ router.get('/:userId', async (req, res) => {
       }
     });
   } catch (error) {
+    console.error(`[GET /user] Error:`, error);
     res.status(500).json({ error: 'Internal error' });
   }
 });
@@ -82,6 +98,16 @@ router.patch('/:userId', async (req, res) => {
       goal
     } = req.body;
 
+    console.log(`[PATCH /user/${req.params.userId}] Received data:`, {
+      firstName,
+      age,
+      gender,
+      heightCm,
+      weightKg,
+      activity,
+      goal
+    });
+
     // Build update object
     const data: any = {};
     if (firstName !== undefined) data.firstName = firstName;
@@ -91,6 +117,8 @@ router.patch('/:userId', async (req, res) => {
     if (weightKg !== undefined) data.weightKg = parseFloat(weightKg);
     if (activity !== undefined) data.activity = activity as ActivityLevel;
     if (goal !== undefined) data.goal = goal as Goal;
+
+    console.log(`[PATCH /user/${req.params.userId}] Parsed data object:`, data);
 
     // If explicit goal provided, trust it. Otherwise compute recommended if enough inputs.
     let computed: number | null = null;
@@ -115,6 +143,18 @@ router.patch('/:userId', async (req, res) => {
 
     const user = await prisma.user.update({ where: { id: req.params.userId }, data });
 
+    console.log(`[PATCH /user/${req.params.userId}] Updated user:`, {
+      id: user.id,
+      firstName: user.firstName,
+      age: user.age,
+      gender: user.gender,
+      heightCm: user.heightCm,
+      weightKg: user.weightKg,
+      activity: user.activity,
+      goal: user.goal,
+      dailyCalorieGoal: user.dailyCalorieGoal
+    });
+
     res.json({
       user: {
         id: user.id,
@@ -130,6 +170,7 @@ router.patch('/:userId', async (req, res) => {
       }, recommended: computed ?? null
     });
   } catch (error) {
+    console.error(`[PATCH /user] Error:`, error);
     res.status(500).json({ error: 'Internal error' });
   }
 });

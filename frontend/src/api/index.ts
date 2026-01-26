@@ -63,7 +63,7 @@ export const updateCalorieGoal = async (userId: string, goal: number) => {
 
 export const updateProfile = async (
   userId: string,
-  data: Partial<Pick<User, 'firstName' | 'age' | 'gender' | 'heightCm' | 'weightKg' | 'activity' | 'goal'>>
+  data: Partial<Pick<User, 'firstName' | 'age' | 'gender' | 'heightCm' | 'weightKg' | 'activity' | 'goal'> & { dailyCalorieGoal?: number }>
 ) => {
   const response = await api.patch<{ user: User; recommended?: number | null }>(`/user/${userId}`, data);
   return response.data;

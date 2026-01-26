@@ -154,33 +154,42 @@ export default function Onboarding({ onComplete }: Props) {
     });
 
     try {
-      // Send all profile data
-      console.log('Sending profile data:', {
-        firstName: formData.firstName,
-        gender: formData.gender,
-        age,
-        heightCm: height,
-        weightKg: weight,
-        activity: formData.activity,
-        goal: formData.goal ?? 'MAINTAIN'
-      });
-      
-      await updateProfile(user.id, {
-        firstName: formData.firstName,
-        gender: formData.gender,
-        age,
-        heightCm: height,
-        weightKg: weight,
-        activity: formData.activity,
-        goal: formData.goal ?? 'MAINTAIN'
-      });
+      // Calculate recommended calories
+      const bmr = formData.gender === 'MALE'
+        ? 10 * weight + 6.25 * height - 5 * age + 5
+        : 10 * weight + 6.25 * height - 5 * age - 161;
+      const factor = { SEDENTARY: 1.2, LIGHT: 1.375, MODERATE: 1.55, ACTIVE: 1.725, VERY_ACTIVE: 1.9 }[formData.activity];
+      let tdee = bmr * factor;
+      const h = height / 100;
+      const bmi = weight / (h * h);
+      const finalGoal = formData.goal ?? 'MAINTAIN';
+      if (finalGoal === 'LOSS') {
+        const deficit = bmi >= 30 ? 0.25 : bmi >= 25 ? 0.2 : 0.15;
+        tdee = tdee * (1 - deficit);
+      } else if (finalGoal === 'GAIN') {
+        tdee = tdee * 1.1;
+      }
+      const min = formData.gender === 'MALE' ? 1500 : 1200;
+      const finalCalories = Math.max(min, Math.round(tdee / 10) * 10);
 
-      // Save calculated calorie goal
-      const goalRes = await updateCalorieGoal(user.id, recommended);
-      console.log('Updated calorie goal:', goalRes);
+      const payload = {
+        firstName: formData.firstName,
+        gender: formData.gender,
+        age,
+        heightCm: height,
+        weightKg: weight,
+        activity: formData.activity,
+        goal: finalGoal,
+        dailyCalorieGoal: finalCalories
+      };
+      
+      console.log('Sending complete profile data:', payload);
+      
+      // Send all profile data in ONE request
+      await updateProfile(user.id, payload as any);
 
       // Signal completion - App.tsx will fetch fresh user data
-      setTimeout(() => onComplete(recommended), 800);
+      setTimeout(() => onComplete(finalCalories), 800);
     } catch (error) {
       haptic.notificationOccurred('error');
       console.error('Onboarding error:', error);
