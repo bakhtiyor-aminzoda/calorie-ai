@@ -48,6 +48,11 @@ router.post('/telegram', async (req, res) => {
 
             if (!request) {
                 console.error(`❌ Request ${requestId} not found in DB`);
+                await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+                    callback_query_id: callback_query.id,
+                    text: '❌ Запрос не найден',
+                    show_alert: true
+                }).catch(e => console.error('Failed to answer:', e.message));
                 return res.sendStatus(200);
             }
             
@@ -55,6 +60,11 @@ router.post('/telegram', async (req, res) => {
             
             if (request.status !== 'PENDING') {
                 console.log(`⚠️ Request ${requestId} already processed: ${request.status}`);
+                await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+                    callback_query_id: callback_query.id,
+                    text: `⚠️ Запрос уже обработан (${request.status})`,
+                    show_alert: true
+                }).catch(e => console.error('Failed to answer:', e.message));
                 return res.sendStatus(200);
             }
 
@@ -104,18 +114,36 @@ router.post('/telegram', async (req, res) => {
             
             console.log(`\n📌 REJECT ACTION - Request ID: ${requestId}, Reason: ${reason}`);
 
-            const request = await prisma.paymentRequest.update({
+            const request = await prisma.paymentRequest.findUnique({
+                where: { id: requestId }
+            });
+
+            if (!request) {
+                console.error(`❌ Request ${requestId} not found in DB`);
+                await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+                    callback_query_id: callback_query.id,
+                    text: '❌ Запрос не найден',
+                    show_alert: true
+                }).catch(e => console.error('Failed to answer:', e.message));
+                return res.sendStatus(200);
+            }
+
+            if (request.status !== 'PENDING') {
+                console.log(`⚠️ Request ${requestId} already processed: ${request.status}`);
+                await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+                    callback_query_id: callback_query.id,
+                    text: `⚠️ Запрос уже обработан (${request.status})`,
+                    show_alert: true
+                }).catch(e => console.error('Failed to answer:', e.message));
+                return res.sendStatus(200);
+            }
+
+            await prisma.paymentRequest.update({
                 where: { id: requestId },
                 data: { status: 'REJECTED' }
             }).catch(e => {
                 console.error(`❌ Failed to update request:`, e.message);
-                return null;
             });
-
-            if (!request) {
-                console.error(`❌ Request ${requestId} not found or update failed`);
-                return res.sendStatus(200);
-            }
             
             console.log(`✓ Request marked as REJECTED`);
 
