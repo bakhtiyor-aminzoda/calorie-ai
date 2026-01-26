@@ -1,10 +1,11 @@
 import { useMemo, useState, useEffect, memo } from 'react';
 import { useStore } from '../store/useStore';
-import { getMealsByDate, getTodayMeals, deleteMeal } from '../api';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Flame, Utensils } from 'lucide-react';
+import { deleteMeal } from '../api';
+import { ChevronLeft, ChevronRight, Flame, Utensils } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MealCard from './MealCard';
 import ConfirmModal from './ConfirmModal';
+import { useMealsQuery } from '../hooks/useMealsQuery';
 
 function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1); }
 function endOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth() + 1, 0); }
@@ -64,9 +65,16 @@ export default function Calendar() {
   const setMeals = useStore(state => state.setMeals);
   const setSelectedDate = useStore(state => state.setSelectedDate);
   const removeMeal = useStore(state => state.removeMeal);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [mealToDelete, setMealToDelete] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const mealsQuery = useMealsQuery(user?.id, selectedDate);
+
+  useEffect(() => {
+    if (mealsQuery.data) {
+      setMeals(mealsQuery.data.meals, mealsQuery.data.totals);
+    }
+  }, [mealsQuery.data, setMeals]);
 
   const grid = useMemo(() => {
     const start = startOfMonth(cursor);
@@ -78,28 +86,10 @@ export default function Calendar() {
     return days;
   }, [cursor]);
 
-  const openDay = async (d: Date) => {
+  const openDay = (d: Date) => {
     if (!user) return;
-    // Haptic feedback
     if (window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback?.selectionChanged();
-
     setSelectedDate(d);
-    setIsLoadingHistory(true);
-    setMeals([], { calories: 0, protein: 0, fat: 0, carbs: 0 });
-
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const dateStr = `${year}-${month}-${day}`;
-
-    try {
-      const data = await getMealsByDate(user.id, dateStr);
-      setMeals(data.meals, data.totals);
-    } catch (e) {
-      console.error("Failed to load history", e);
-    } finally {
-      setIsLoadingHistory(false);
-    }
   };
 
   const handleDelete = async () => {
@@ -108,6 +98,7 @@ export default function Calendar() {
     try {
       await deleteMeal(mealToDelete.id);
       removeMeal(mealToDelete.id);
+      await mealsQuery.invalidateMeals();
       setMealToDelete(null);
     } catch (error) {
       alert('Ошибка при удалении');
@@ -119,6 +110,7 @@ export default function Calendar() {
   const monthLabel = cursor.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
   const selectedDateLabel = selectedDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
   const isSelectedToday = isSameDate(selectedDate, today);
+  const isLoadingHistory = mealsQuery.isLoading || mealsQuery.isFetching;
 
   return (
     <div className="min-h-screen pb-32 px-5 pt-10">

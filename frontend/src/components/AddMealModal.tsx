@@ -334,6 +334,28 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
                     <NutrientCard label="Угл" value={analysisResult.carbs} color="bg-emerald-50/50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-300" />
                   </div>
 
+                  <div className="bg-white dark:bg-white/5 rounded-3xl p-4 border border-black/5 dark:border-white/5 shadow-sm space-y-3">
+                    {analysisResult.weightG && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-tg-hint">Вес блюда</span>
+                        <span className="text-base font-bold text-tg-text">{Math.round(analysisResult.weightG)} г</span>
+                      </div>
+                    )}
+
+                    {analysisResult.ingredients && analysisResult.ingredients.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="text-sm font-semibold text-tg-text">Ингредиенты</div>
+                        <div className="flex flex-wrap gap-2">
+                          {analysisResult.ingredients.map((ing: string, idx: number) => (
+                            <span key={idx} className="px-3 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-sm text-tg-text font-medium border border-black/5 dark:border-white/10">
+                              {ing}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex gap-3 mt-1">
                     <button onClick={() => setAnalysisResult(null)} className="flex-1 py-4 bg-gray-200 dark:bg-white/5 text-tg-text font-bold rounded-2xl active:scale-95 transition-all">Назад</button>
                     <button onClick={handleSaveMeal} disabled={isSaving} className="flex-[2] py-4 bg-brand-500 text-white font-bold rounded-2xl shadow-glow active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50">

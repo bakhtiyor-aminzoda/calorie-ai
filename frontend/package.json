@@ -9,6 +9,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.20",
     "@telegram-apps/sdk-react": "^1.1.3",
     "axios": "^1.7.2",
     "canvas-confetti": "^1.9.4",

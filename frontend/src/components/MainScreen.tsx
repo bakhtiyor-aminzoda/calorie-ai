@@ -1,21 +1,21 @@
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import ProgressCircle from './ProgressCircle';
 import MealCard from './MealCard';
 import { MealListSkeleton } from './SkeletonLoader';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Flame, Utensils, RefreshCw } from 'lucide-react';
+import { Flame, Utensils, RefreshCw } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import { deleteMeal } from '../api';
+import { useMealsQuery } from '../hooks/useMealsQuery';
 
 export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => void }) {
   const user = useStore(state => state.user);
   const meals = useStore(state => state.meals);
   const totals = useStore(state => state.totals);
   const selectedDate = useStore(state => state.selectedDate);
+  const setMeals = useStore(state => state.setMeals);
   const removeMeal = useStore(state => state.removeMeal);
-  const fetchMeals = useStore(state => state.fetchMeals);
-  const isLoading = useStore(state => state.isLoading);
   const [mealToDelete, setMealToDelete] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -23,6 +23,14 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
   const touchStartY = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastUpdateTime = useRef(0);
+
+  const mealsQuery = useMealsQuery(user?.id, selectedDate);
+
+  useEffect(() => {
+    if (mealsQuery.data) {
+      setMeals(mealsQuery.data.meals, mealsQuery.data.totals);
+    }
+  }, [mealsQuery.data, setMeals]);
 
   if (!user) return null;
 
@@ -50,6 +58,7 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
     try {
       await deleteMeal(mealToDelete.id);
       removeMeal(mealToDelete.id);
+      await mealsQuery.invalidateMeals();
       setMealToDelete(null);
     } catch (error) {
       alert('Ошибка при удалении');
@@ -62,7 +71,7 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
     if (isRefreshing) return;
     setIsRefreshing(true);
     try {
-      await fetchMeals(selectedDate);
+      await mealsQuery.refetch();
     } catch (error) {
       console.error('Failed to refresh:', error);
     } finally {
@@ -71,7 +80,7 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
         setPullDistance(0);
       }, 500);
     }
-  }, [fetchMeals, selectedDate]); // Remove isRefreshing from deps
+  }, [mealsQuery, isRefreshing]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (containerRef.current && containerRef.current.scrollTop === 0) {
@@ -222,7 +231,7 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
         </div>
 
         <div className="space-y-4">
-          {isLoading ? (
+          {mealsQuery.isLoading && meals.length === 0 ? (
             <MealListSkeleton count={3} />
           ) : (
             <div className="space-y-4">
