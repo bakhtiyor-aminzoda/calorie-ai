@@ -7,8 +7,11 @@ const prisma = new PrismaClient();
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
 router.post('/telegram', async (req, res) => {
-    console.log('=== WEBHOOK RECEIVED ===');
-    console.log('Full payload:', JSON.stringify(req.body, null, 2));
+    console.log('\n╔════════════════════════════════════════╗');
+    console.log('║  WEBHOOK HANDLER CALLED                ║');
+    console.log('╚════════════════════════════════════════╝');
+    console.log('Received at:', new Date().toISOString());
+    console.log('Full body:', JSON.stringify(req.body, null, 2));
     
     const { callback_query } = req.body;
 
