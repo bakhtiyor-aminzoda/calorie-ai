@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import ProgressCircle from './ProgressCircle';
 import MealCard from './MealCard';
@@ -22,12 +22,24 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
   const [pullDistance, setPullDistance] = useState(0);
   const touchStartY = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastUpdateTime = useRef(0);
 
   if (!user) return null;
 
-  const progress = Math.min((totals.calories / user.dailyCalorieGoal) * 100, 100);
-  const diff = Math.abs(user.dailyCalorieGoal - totals.calories); // Remaining or Excess amount
-  const isOverLimit = totals.calories > user.dailyCalorieGoal;
+  const progress = useMemo(() => 
+    Math.min((totals.calories / user.dailyCalorieGoal) * 100, 100),
+    [totals.calories, user.dailyCalorieGoal]
+  );
+  
+  const diff = useMemo(() => 
+    Math.abs(user.dailyCalorieGoal - totals.calories),
+    [user.dailyCalorieGoal, totals.calories]
+  );
+  
+  const isOverLimit = useMemo(() => 
+    totals.calories > user.dailyCalorieGoal,
+    [totals.calories, user.dailyCalorieGoal]
+  );
 
   const isToday = new Date().toDateString() === new Date(selectedDate).toDateString();
   const dateTitle = isToday ? 'Сегодня' : new Date(selectedDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
@@ -59,7 +71,7 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
         setPullDistance(0);
       }, 500);
     }
-  }, [fetchMeals, selectedDate, isRefreshing]);
+  }, [fetchMeals, selectedDate]); // Remove isRefreshing from deps
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (containerRef.current && containerRef.current.scrollTop === 0) {
@@ -69,6 +81,11 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (containerRef.current && containerRef.current.scrollTop === 0 && !isRefreshing) {
+      const now = Date.now();
+      // Throttle to 16ms (~60fps)
+      if (now - lastUpdateTime.current < 16) return;
+      lastUpdateTime.current = now;
+      
       const touchY = e.touches[0].clientY;
       const pull = Math.max(0, touchY - touchStartY.current);
       if (pull > 0 && pull < 120) {

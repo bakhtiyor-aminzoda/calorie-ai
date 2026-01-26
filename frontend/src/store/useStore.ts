@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { type User, type Meal, type Totals } from '../api';
+import { type User, type Meal, type Totals, getMealsByDate, getTodayMeals } from '../api';
 
 
 
@@ -15,6 +15,7 @@ interface AppState {
   addMeal: (meal: Meal) => void;
   removeMeal: (mealId: string) => void;
   setLoading: (loading: boolean) => void;
+  fetchMeals: (date: Date) => Promise<void>;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -48,5 +49,23 @@ export const useStore = create<AppState>((set) => ({
     };
     return { meals: newMeals, totals: newTotals };
   }),
-  setLoading: (isLoading) => set({ isLoading })
+  setLoading: (isLoading) => set({ isLoading }),
+  fetchMeals: async (date: Date) => {
+    const state = useStore.getState();
+    if (!state.user) return;
+    
+    set({ isLoading: true });
+    try {
+      const isToday = new Date().toDateString() === date.toDateString();
+      const data = isToday 
+        ? await getTodayMeals(state.user.id)
+        : await getMealsByDate(state.user.id, date.toISOString().split('T')[0]);
+      
+      set({ meals: data.meals, totals: data.totals });
+    } catch (error) {
+      console.error('Failed to fetch meals:', error);
+    } finally {
+      set({ isLoading: false });
+    }
+  }
 }));

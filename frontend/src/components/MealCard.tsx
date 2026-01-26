@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { useMemo, memo } from 'react';
 import { Utensils } from 'lucide-react';
 
 interface Meal {
@@ -13,7 +13,10 @@ interface Meal {
 }
 
 const MealCard = memo(({ meal, onDelete }: { meal: Meal; onDelete: (meal: Meal) => void }) => {
-  const time = new Date(meal.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const time = useMemo(() => 
+    new Date(meal.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }), 
+    [meal.createdAt]
+  );
 
   return (
     <article className="relative overflow-hidden rounded-[1.5rem] bg-white dark:bg-[#1C1C1E] shadow-sm border border-gray-100 dark:border-white/5 transition-transform active:scale-[0.98]">
