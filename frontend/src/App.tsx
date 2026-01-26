@@ -70,12 +70,15 @@ function AppContent() {
         }
 
         const authenticatedUser = await authenticate(raw);
+        console.log('[App.init] Authenticated user:', authenticatedUser);
         setUser(authenticatedUser);
 
         // Pre-determine if onboarding is needed, but don't show yet
         if (!authenticatedUser.age || !authenticatedUser.heightCm || !authenticatedUser.weightKg) {
+          console.log('[App.init] User needs onboarding (missing profile data)');
           setIsOnboarding(true);
         } else {
+          console.log('[App.init] User has complete profile, fetching meals');
           const { meals, totals } = await getTodayMeals(authenticatedUser.id);
           setMeals(meals, totals);
         }
@@ -97,9 +100,10 @@ function AppContent() {
   const handleOnboardingComplete = async () => {
     if (user) {
       try {
+        console.log(`[App] Onboarding complete for user ID: ${user.id}`);
         // Fetch updated user profile from backend to get all new data
         const updatedUser = await getProfile(user.id);
-        console.log('Onboarding complete, updated user:', updatedUser);
+        console.log(`[App] Fetched profile for user ${user.id}:`, updatedUser);
         setUser(updatedUser);
         setIsOnboarding(false);
         const { meals, totals } = await getTodayMeals(user.id);

@@ -183,10 +183,13 @@ export default function Onboarding({ onComplete }: Props) {
         dailyCalorieGoal: finalCalories
       };
       
+      console.log(`[Onboarding] User ID: ${user.id}`);
       console.log('Sending complete profile data:', payload);
       
       // Send all profile data in ONE request
       await updateProfile(user.id, payload as any);
+      
+      console.log(`[Onboarding] Profile updated for user ${user.id}`);
 
       // Signal completion - App.tsx will fetch fresh user data
       setTimeout(() => onComplete(finalCalories), 800);
