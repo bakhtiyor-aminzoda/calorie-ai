@@ -7,14 +7,11 @@ import { ComponentErrorBoundary } from './ComponentErrorBoundary';
 import SubscriptionModal from './SubscriptionModal';
 
 // Memoized Nutrient Card component for maximum performance
-const NutrientCard = memo(({ label, value, color, unit = 'г', onClick }: { label: string, value: number, color: string, unit?: string, onClick?: () => void }) => (
-  <button
-    onClick={onClick}
-    className={`${color} p-3 rounded-2xl text-center shadow-sm border border-black/5 dark:border-white/5 active:scale-95 transition-all w-full`}
-  >
+const NutrientCard = memo(({ label, value, color, unit = 'г' }: { label: string, value: number, color: string, unit?: string }) => (
+  <div className={`${color} p-3 rounded-2xl text-center shadow-sm border border-black/5 dark:border-white/5 w-full`}>
     <div className="text-[10px] opacity-60 font-bold mb-1 uppercase tracking-tight">{label}</div>
     <div className="text-base font-black tabular-nums">{value}{unit}</div>
-  </button>
+  </div>
 ));
 
 const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
@@ -39,9 +36,6 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
     confidence?: number;
     photoUrl?: string;
   } | null>(null);
-
-  const [editingField, setEditingField] = useState<string | null>(null);
-  const editInputRef = useRef<HTMLInputElement>(null);
 
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -163,17 +157,6 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
     } finally {
       setIsAnalyzing(false);
     }
-  };
-
-  const handleUpdateResult = (field: string, value: string | number) => {
-    if (!analysisResult) return;
-    setAnalysisResult({ ...analysisResult, [field]: value });
-  };
-
-  const startEditing = (field: string) => {
-    if (window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-    setEditingField(field);
-    setTimeout(() => editInputRef.current?.focus(), 50);
   };
 
   const [isSaving, setIsSaving] = useState(false);
@@ -338,57 +321,17 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
                       <div className={`px-2 py-0.5 rounded-md text-[10px] font-bold inline-block mb-1 border ${(analysisResult.confidence ?? 1) > 0.8 ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-100' : 'bg-yellow-500/20 border-yellow-500/30 text-yellow-100'}`}>
                         AI CONFIDENCE {Math.round((analysisResult.confidence ?? 0.98) * 100)}%
                       </div>
-                      {editingField === 'name' ? (
-                        <input
-                          ref={editInputRef}
-                          type="text"
-                          value={analysisResult.name}
-                          onChange={(e) => handleUpdateResult('name', e.target.value)}
-                          onBlur={() => setEditingField(null)}
-                          className="w-full bg-white/20 backdrop-blur-md text-white border-none outline-none rounded-lg px-2 py-1 text-xl font-bold"
-                        />
-                      ) : (
-                        <h3
-                          onClick={() => startEditing('name')}
-                          className="text-white text-xl font-bold line-clamp-1 flex items-center gap-2 cursor-pointer group"
-                        >
+                      <h3 className="text-white text-xl font-bold line-clamp-1">
                           {analysisResult.name}
-                          <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-50 transition-opacity" />
-                        </h3>
-                      )}
+                      </h3>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-4 gap-2.5">
-                    {editingField && (['calories', 'protein', 'fat', 'carbs'].includes(editingField)) ? (
-                      <div className="col-span-4 bg-white dark:bg-white/5 p-4 rounded-3xl border border-brand-500/30 flex items-center justify-between">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-tg-hint uppercase">
-                            {editingField === 'calories' ? 'Калории' : editingField === 'protein' ? 'Белки' : editingField === 'fat' ? 'Жиры' : 'Углеводы'}
-                          </span>
-                          <span className="text-[10px] text-brand-500 font-medium">Редактирование...</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <input
-                            ref={editInputRef}
-                            type="number"
-                            inputMode="decimal"
-                            value={analysisResult[editingField as keyof typeof analysisResult] || ''}
-                            onChange={(e) => handleUpdateResult(editingField, Number(e.target.value))}
-                            onBlur={() => setEditingField(null)}
-                            className="w-20 bg-gray-100 dark:bg-white/10 text-right font-black text-xl rounded-xl px-2 py-1 outline-none text-tg-text"
-                          />
-                          <span className="font-bold text-tg-hint">{editingField === 'calories' ? 'ккал' : 'г'}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <NutrientCard label="Ккал" value={analysisResult.calories} color="bg-white dark:bg-white/5" unit="" onClick={() => startEditing('calories')} />
-                        <NutrientCard label="Белки" value={analysisResult.protein} color="bg-blue-50/50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-300" onClick={() => startEditing('protein')} />
-                        <NutrientCard label="Жиры" value={analysisResult.fat} color="bg-yellow-50/50 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-300" onClick={() => startEditing('fat')} />
-                        <NutrientCard label="Угл" value={analysisResult.carbs} color="bg-emerald-50/50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-300" onClick={() => startEditing('carbs')} />
-                      </>
-                    )}
+                    <NutrientCard label="Ккал" value={analysisResult.calories} color="bg-white dark:bg-white/5" unit="" />
+                    <NutrientCard label="Белки" value={analysisResult.protein} color="bg-blue-50/50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-300" />
+                    <NutrientCard label="Жиры" value={analysisResult.fat} color="bg-yellow-50/50 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-300" />
+                    <NutrientCard label="Угл" value={analysisResult.carbs} color="bg-emerald-50/50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-300" />
                   </div>
 
                   <div className="flex gap-3 mt-1">
