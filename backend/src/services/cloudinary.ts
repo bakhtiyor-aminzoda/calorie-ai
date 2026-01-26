@@ -14,8 +14,6 @@ export async function uploadImage(buffer: Buffer): Promise<string> {
         transformation: [
           { width: 800, height: 800, crop: 'limit', quality: 'auto:good', fetch_format: 'auto' }
         ],
-        // Enable automatic format selection (WebP for browsers that support it)
-        format: 'auto',
         // Compress aggressively while maintaining visual quality
         quality: 85
       },
