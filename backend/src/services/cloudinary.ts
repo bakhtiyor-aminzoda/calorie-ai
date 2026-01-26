@@ -9,7 +9,16 @@ cloudinary.config({
 export async function uploadImage(buffer: Buffer): Promise<string> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload_stream(
-      { folder: 'calorie-ai', transformation: [{ width: 800, height: 800, crop: 'limit' }] },
+      { 
+        folder: 'calorie-ai',
+        transformation: [
+          { width: 800, height: 800, crop: 'limit', quality: 'auto:good', fetch_format: 'auto' }
+        ],
+        // Enable automatic format selection (WebP for browsers that support it)
+        format: 'auto',
+        // Compress aggressively while maintaining visual quality
+        quality: 85
+      },
       (error, result) => {
         if (error) reject(error);
         else if (result) resolve(result.secure_url);

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useStore } from '../store/useStore';
 import ProgressCircle from './ProgressCircle';
 import MealCard from './MealCard';
+import { MealListSkeleton } from './SkeletonLoader';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Flame, Utensils } from 'lucide-react';
+import { Plus, Flame, Utensils, RefreshCw } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import { deleteMeal } from '../api';
 
@@ -13,8 +14,14 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
   const totals = useStore(state => state.totals);
   const selectedDate = useStore(state => state.selectedDate);
   const removeMeal = useStore(state => state.removeMeal);
+  const fetchMeals = useStore(state => state.fetchMeals);
+  const isLoading = useStore(state => state.isLoading);
   const [mealToDelete, setMealToDelete] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const touchStartY = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   if (!user) return null;
 
@@ -39,8 +46,71 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
     }
   };
 
+  const handleRefresh = useCallback(async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      await fetchMeals(selectedDate);
+    } catch (error) {
+      console.error('Failed to refresh:', error);
+    } finally {
+      setTimeout(() => {
+        setIsRefreshing(false);
+        setPullDistance(0);
+      }, 500);
+    }
+  }, [fetchMeals, selectedDate, isRefreshing]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (containerRef.current && containerRef.current.scrollTop === 0) {
+      touchStartY.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (containerRef.current && containerRef.current.scrollTop === 0 && !isRefreshing) {
+      const touchY = e.touches[0].clientY;
+      const pull = Math.max(0, touchY - touchStartY.current);
+      if (pull > 0 && pull < 120) {
+        setPullDistance(pull);
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (pullDistance > 80 && !isRefreshing) {
+      handleRefresh();
+    } else {
+      setPullDistance(0);
+    }
+  };
+
   return (
-    <div className="min-h-screen pb-32">
+    <div 
+      ref={containerRef}
+      className="min-h-screen pb-32 overflow-y-auto"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{ transform: `translateY(${pullDistance}px)`, transition: pullDistance === 0 ? 'transform 0.3s ease' : 'none' }}
+    >
+      {/* Pull to Refresh Indicator */}
+      <div 
+        className="absolute top-0 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center"
+        style={{ 
+          transform: `translateY(${Math.min(pullDistance - 40, 40)}px)`,
+          opacity: Math.min(pullDistance / 80, 1),
+          transition: 'transform 0.1s ease, opacity 0.1s ease'
+        }}
+      >
+        <div className="bg-white dark:bg-[#1C1C1E] rounded-full p-2 shadow-lg">
+          <RefreshCw 
+            className={`w-5 h-5 text-brand-500 ${isRefreshing ? 'animate-spin' : ''}`}
+            style={{ transform: `rotate(${pullDistance * 2}deg)` }}
+          />
+        </div>
+      </div>
+
       {/* Background Ambience */}
 
       {/* Header Section */}
@@ -135,36 +205,40 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
         </div>
 
         <div className="space-y-4">
-          <div className="space-y-4">
-            {meals.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col items-center justify-center py-20 text-center"
-              >
-                <div className="relative mb-6">
-                  <div className="absolute inset-0 bg-brand-500 blur-2xl opacity-10 animate-pulse" />
-                  <div className="relative p-5 bg-white dark:bg-white/5 rounded-3xl border border-black/5 dark:border-white/5 shadow-sm">
-                    <Utensils className="w-10 h-10 text-brand-500 opacity-40" />
-                  </div>
-                </div>
-                <h3 className="text-lg font-bold text-tg-text mb-1">Ни одной записи</h3>
-                <p className="text-sm text-tg-hint max-w-[200px] mx-auto">
-                  Сфотографируй завтрак или обед, чтобы начать расчет
-                </p>
-              </motion.div>
-            ) : (
-              meals.map((meal, i) => (
-                <div
-                  key={meal.id}
-                  className="animate-fade-in-up"
-                  style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'both' }}
+          {isLoading ? (
+            <MealListSkeleton count={3} />
+          ) : (
+            <div className="space-y-4">
+              {meals.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col items-center justify-center py-20 text-center"
                 >
-                  <MealCard meal={meal} onDelete={setMealToDelete} />
-                </div>
-              ))
-            )}
-          </div>
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-brand-500 blur-2xl opacity-10 animate-pulse" />
+                    <div className="relative p-5 bg-white dark:bg-white/5 rounded-3xl border border-black/5 dark:border-white/5 shadow-sm">
+                      <Utensils className="w-10 h-10 text-brand-500 opacity-40" />
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-bold text-tg-text mb-1">Ни одной записи</h3>
+                  <p className="text-sm text-tg-hint max-w-[200px] mx-auto">
+                    Сфотографируй завтрак или обед, чтобы начать расчет
+                  </p>
+                </motion.div>
+              ) : (
+                meals.map((meal, i) => (
+                  <div
+                    key={meal.id}
+                    className="animate-fade-in-up"
+                    style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'both' }}
+                  >
+                    <MealCard meal={meal} onDelete={setMealToDelete} />
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </section>
 

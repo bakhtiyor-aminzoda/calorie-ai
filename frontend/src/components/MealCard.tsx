@@ -21,7 +21,13 @@ const MealCard = memo(({ meal, onDelete }: { meal: Meal; onDelete: (meal: Meal) 
         {/* Image / Icon */}
         <div className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 dark:bg-white/5 self-center">
           {meal.photoUrl ? (
-            <img src={meal.photoUrl} alt={meal.name} className="w-full h-full object-cover" />
+            <img 
+              src={meal.photoUrl} 
+              alt={meal.name} 
+              className="w-full h-full object-cover" 
+              loading="lazy"
+              decoding="async"
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600">
               <Utensils className="w-6 h-6" />
