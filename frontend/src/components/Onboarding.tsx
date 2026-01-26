@@ -145,7 +145,8 @@ export default function Onboarding({ onComplete }: Props) {
     });
 
     try {
-      const updatedProfile = await updateProfile(user.id, {
+      // Send all profile data
+      await updateProfile(user.id, {
         firstName: formData.firstName,
         gender: formData.gender,
         age,
@@ -155,17 +156,14 @@ export default function Onboarding({ onComplete }: Props) {
         goal: formData.goal ?? 'MAINTAIN'
       });
 
-      // Save calculated goal
-      const finalUser = await updateCalorieGoal(user.id, recommended);
+      // Save calculated calorie goal
+      await updateCalorieGoal(user.id, recommended);
 
-      // Update store immediately with full data (merged profile + goal)
-      setUser({ ...finalUser, firstName: updatedProfile.user.firstName }); // Ensure name is definitely there
-
-      // Delay slightly for effect
+      // Signal completion - App.tsx will fetch fresh user data
       setTimeout(() => onComplete(recommended), 800);
     } catch (error) {
       haptic.notificationOccurred('error');
-      console.error(error);
+      console.error('Onboarding error:', error);
       setIsSubmitting(false);
     }
   };

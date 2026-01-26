@@ -8,7 +8,7 @@ import Calendar from './components/Calendar';
 import Profile from './components/Profile';
 import AddMealModal from './components/AddMealModal';
 import { useStore } from './store/useStore';
-import { authenticate, getTodayMeals } from './api';
+import { authenticate, getTodayMeals, getProfile } from './api';
 
 function AppContent() {
   const { user, setUser, setMeals } = useStore();
@@ -96,9 +96,17 @@ function AppContent() {
 
   const handleOnboardingComplete = async () => {
     if (user) {
-      setIsOnboarding(false);
-      const { meals, totals } = await getTodayMeals(user.id);
-      setMeals(meals, totals);
+      try {
+        // Fetch updated user profile from backend to get all new data
+        const updatedUser = await getProfile(user.id);
+        setUser(updatedUser);
+        setIsOnboarding(false);
+        const { meals, totals } = await getTodayMeals(user.id);
+        setMeals(meals, totals);
+      } catch (error) {
+        console.error('Failed to load profile after onboarding:', error);
+        setIsOnboarding(false);
+      }
     }
   };
 
