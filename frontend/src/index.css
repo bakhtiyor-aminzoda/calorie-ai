@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(85,126,255,0.10), transparent 60%),
+              radial-gradient(800px 400px at 100% 10%, rgba(85,126,255,0.08), transparent 60%),
+              var(--tg-theme-bg-color, #0b0e14);
+  color: var(--tg-theme-text-color, #0b1220);
+  overscroll-behavior-y: none;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.glass {
+  background: linear-gradient(145deg, rgba(255,255,255,0.66), rgba(255,255,255,0.36));
+  backdrop-filter: saturate(140%) blur(8px);
+}
+.glass-dark {
+  background: linear-gradient(145deg, rgba(18,18,22,0.66), rgba(18,18,22,0.36));
+  backdrop-filter: saturate(140%) blur(8px);
+}
+
+.btn-primary {
+  @apply bg-tg-button text-tg-button-text rounded-2xl font-semibold shadow-glow hover:opacity-90 active:opacity-80 transition;
+}
+
+.card {
+  @apply rounded-2xl shadow-soft bg-white dark:bg-gray-800;
+}
+
+.chip {
+  @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium;
+}
+
+/* Optimized Animations */
+@keyframes gradient-xy {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(10px, 10px) rotate(1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.animate-gradient-xy {
+  animation: gradient-xy 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Optimize Glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(20, 20, 25, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Remove scroll bounce */
+html, body {
+  overscroll-behavior: none;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
