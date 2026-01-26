@@ -79,8 +79,9 @@ function AppContent() {
           const { meals, totals } = await getTodayMeals(authenticatedUser.id);
           setMeals(meals, totals);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Init error:', error);
+        (window as any)._lastError = error.message || JSON.stringify(error);
         setOutsideTelegram(true);
       } finally {
         setIsInitializing(false);
