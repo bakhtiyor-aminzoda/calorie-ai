@@ -2,7 +2,7 @@ const axios = require('axios');
 require('dotenv').config();
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const BACKEND_URL = 'https://calorie-ai.onrender.com'; // Твой Render URL
+const BACKEND_URL = 'https://calorie-ai-b8r5.onrender.com'; // Твой Render URL
 
 async function setWebhook() {
   try {

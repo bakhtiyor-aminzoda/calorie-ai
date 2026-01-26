@@ -92,7 +92,8 @@ router.post('/telegram', async (req, res) => {
                 chat_id: chatId,
                 message_id: messageId,
                 caption: `${message.caption || ''}\n\n✅ *ОДОБРЕНО!* Пользователь получил Premium.`,
-                parse_mode: 'Markdown'
+                parse_mode: 'Markdown',
+                reply_markup: { inline_keyboard: [] }  // Remove buttons
             }).catch(e => console.error('❌ Failed to edit caption:', e.message));
             
             console.log(`✅ APPROVE COMPLETED SUCCESSFULLY`);
@@ -136,7 +137,8 @@ router.post('/telegram', async (req, res) => {
                 chat_id: chatId,
                 message_id: messageId,
                 caption: `${message.caption || ''}\n\n❌ *ОТКЛОНЕНО.*\nПричина: ${reasonText}`,
-                parse_mode: 'Markdown'
+                parse_mode: 'Markdown',
+                reply_markup: { inline_keyboard: [] }  // Remove buttons
             }).catch(e => console.error('❌ Failed to edit caption:', e.message));
             
             console.log(`✅ REJECT COMPLETED SUCCESSFULLY`);
