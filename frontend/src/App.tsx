@@ -108,6 +108,13 @@ function AppContent() {
           <div className="text-3xl">📱</div>
           <p className="text-lg font-semibold">Открой мини‑апп внутри Telegram</p>
           <p className="text-tg-hint text-sm">Используй кнопку в боте для запуска</p>
+          <div className="text-xs text-red-500 mt-4 max-w-[200px] overflow-hidden">
+            Debug: {typeof window !== 'undefined' ? JSON.stringify({
+              inTelegram: !!window.Telegram?.WebApp,
+              initDataLen: window.Telegram?.WebApp?.initData?.length,
+              search: window.location.search
+            }) : 'no-window'}
+          </div>
         </div>
       </div>
     );

@@ -17,27 +17,39 @@ AI-powered calorie tracker integrated with Telegram Mini Apps.
 
 ## 🚀 Deployment Guide (Production)
 
-### 1. Database & Backend (Railway)
-We recommend **Railway** because it provides both a PostgreSQL database and Node.js hosting easily.
+### 1. Database & Backend (Render.com)
+We recommend **Render.com** because it offers a **completely free tier** for both Node.js and PostgreSQL.
 
-1. **Sign up** at [Railway.app](https://railway.app/).
-2. **Create a New Project** -> **Deploy from GitHub repo**.
-3. Select this repository.
-4. **Add a Database**:
-   - In the project view, click "New" -> "Database" -> "PostgreSQL".
-   - This will automatically provide a `DATABASE_URL` variable to your services.
-5. **Configure Backend Service**:
-   - Go to your imported repo service settings.
-   - **Root Directory**: `backend`
+### 1. Database (Neon.tech)
+Since Render limits free databases, we recommend **Neon.tech** (generous free tier, fast, serverless).
+
+1. **Sign up** at [neon.tech](https://neon.tech/).
+2. **Create Project**:
+   - Name: `calorie-ai`
+   - Region: Select nearest to you (e.g., Frankfurt for EU).
+3. **Get Connection String**:
+   - On the Dashboard, copy the **Connection String** (it looks like `postgres://...`).
+   - We will use this as `DATABASE_URL` in the next step.
+
+### 2. Backend (Render.com)
+We will host the Node.js server on Render.
+
+1. **Sign up** at [render.com](https://render.com/).
+   - Click **New +** -> **Web Service**.
+   - Connect your GitHub repository (`calorie-ai`).
+   - **Runtime**: Node
    - **Build Command**: `npm install && npm run build && npx prisma migrate deploy`
    - **Start Command**: `npm start`
-   - **Environment Variables**:
-     - `DATABASE_URL`: (Railway adds this automatically if you link the DB)
+   - **Instance Type**: Free
+   - **Environment Variables** (Add these in "Environment"):
+     - `DATABASE_URL`: Paste the Internal DB URL you copied.
      - `OPENAI_API_KEY`: Your OpenAI key.
      - `TELEGRAM_BOT_TOKEN`: Your Telegram Bot Token.
-     - `ADMIN_CHAT_ID`: Your Telegram Chat ID for receiving payment requests.
-     - `FRONTEND_URL`: The URL of your deployed frontend (add this *after* deploying frontend).
-     - `PORT`: `3000` (or let Railway assign it).
+     - `ADMIN_CHAT_ID`: Your Telegram Chat ID.
+     - `PORT`: `10000` (Render default) or `3000`.
+     - `FRONTEND_URL`: Your Vercel URL (add later).
+4. **Deploy**.
+   - Wait for it to go Live. Copy the service URL (e.g., `https://calorie-ai.onrender.com`).
 
 ### 2. Frontend (Vercel)
 We recommend **Vercel** for the frontend.
