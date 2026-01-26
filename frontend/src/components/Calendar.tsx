@@ -1,11 +1,11 @@
 import { useMemo, useState, useEffect, memo } from 'react';
 import { useStore } from '../store/useStore';
-import { deleteMeal } from '../api';
 import { ChevronLeft, ChevronRight, Flame, Utensils } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MealCard from './MealCard';
 import ConfirmModal from './ConfirmModal';
 import { useMealsQuery } from '../hooks/useMealsQuery';
+import { useDeleteMealMutation } from '../hooks/useDeleteMealMutation';
 
 function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1); }
 function endOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth() + 1, 0); }
@@ -64,11 +64,11 @@ export default function Calendar() {
   const selectedDate = useStore(state => state.selectedDate);
   const setMeals = useStore(state => state.setMeals);
   const setSelectedDate = useStore(state => state.setSelectedDate);
-  const removeMeal = useStore(state => state.removeMeal);
   const [mealToDelete, setMealToDelete] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const mealsQuery = useMealsQuery(user?.id, selectedDate);
+  const deleteMutation = useDeleteMealMutation(user?.id);
 
   useEffect(() => {
     if (mealsQuery.data) {
@@ -90,21 +90,17 @@ export default function Calendar() {
     if (!user) return;
     if (window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback?.selectionChanged();
     setSelectedDate(d);
+    mealsQuery.prefetchAdjacentDates();
   };
 
   const handleDelete = async () => {
     if (!mealToDelete) return;
     setIsDeleting(true);
-    try {
-      await deleteMeal(mealToDelete.id);
-      removeMeal(mealToDelete.id);
-      await mealsQuery.invalidateMeals();
-      setMealToDelete(null);
-    } catch (error) {
-      alert('Ошибка при удалении');
-    } finally {
-      setIsDeleting(false);
-    }
+    deleteMutation.mutate(mealToDelete, {
+      onSuccess: () => setMealToDelete(null),
+      onError: () => alert('Ошибка при удалении'),
+      onSettled: () => setIsDeleting(false)
+    });
   };
 
   const monthLabel = cursor.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Scan, X, Camera, Image as ImageIcon, Zap, Sparkles } from 'lucide-react';
 import { ComponentErrorBoundary } from './ComponentErrorBoundary';
 import SubscriptionModal from './SubscriptionModal';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Memoized Nutrient Card component for maximum performance
 const NutrientCard = memo(({ label, value, color, unit = 'г' }: { label: string, value: number, color: string, unit?: string }) => (
@@ -17,6 +18,8 @@ const NutrientCard = memo(({ label, value, color, unit = 'г' }: { label: string
 const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
   const user = useStore(state => state.user);
   const addMeal = useStore(state => state.addMeal);
+  const selectedDate = useStore(state => state.selectedDate);
+  const queryClient = useQueryClient();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -168,6 +171,42 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
       const photoSource = analysisResult.photoUrl || selectedFile;
       const meal = await createMeal(user.id, photoSource, analysisResult);
       addMeal(meal);
+
+      // Update query cache so navigating between tabs keeps the new meal visible
+      const mealDate = meal.date || meal.createdAt;
+      const dateKey = mealDate ? mealDate.split('T')[0] : selectedDate.toISOString().split('T')[0];
+      const isToday = new Date(mealDate || Date.now()).toDateString() === new Date().toDateString();
+
+      const updateCache = (key: (string | undefined)[]) => {
+        queryClient.setQueryData<{ meals: any[]; totals: any }>(key, (prev) => {
+          if (!prev) {
+            return {
+              meals: [meal],
+              totals: {
+                calories: meal.calories,
+                protein: meal.protein,
+                fat: meal.fat,
+                carbs: meal.carbs
+              }
+            };
+          }
+          const exists = prev.meals.some((m) => m.id === meal.id);
+          if (exists) return prev;
+          const meals = [meal, ...prev.meals];
+          const totals = {
+            calories: prev.totals.calories + meal.calories,
+            protein: prev.totals.protein + meal.protein,
+            fat: prev.totals.fat + meal.fat,
+            carbs: prev.totals.carbs + meal.carbs
+          };
+          return { meals, totals };
+        });
+      };
+
+      updateCache(['meals', user.id, dateKey]);
+      if (isToday) updateCache(['meals', user.id, 'today']);
+      queryClient.invalidateQueries({ queryKey: ['meals', user.id] });
+
       if (window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
       onClose();
     } catch (e) {

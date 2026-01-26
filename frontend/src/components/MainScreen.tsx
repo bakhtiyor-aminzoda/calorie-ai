@@ -6,8 +6,8 @@ import { MealListSkeleton } from './SkeletonLoader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Utensils, RefreshCw } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
-import { deleteMeal } from '../api';
 import { useMealsQuery } from '../hooks/useMealsQuery';
+import { useDeleteMealMutation } from '../hooks/useDeleteMealMutation';
 
 export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => void }) {
   const user = useStore(state => state.user);
@@ -15,7 +15,6 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
   const totals = useStore(state => state.totals);
   const selectedDate = useStore(state => state.selectedDate);
   const setMeals = useStore(state => state.setMeals);
-  const removeMeal = useStore(state => state.removeMeal);
   const [mealToDelete, setMealToDelete] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -25,6 +24,7 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
   const lastUpdateTime = useRef(0);
 
   const mealsQuery = useMealsQuery(user?.id, selectedDate);
+  const deleteMutation = useDeleteMealMutation(user?.id);
 
   useEffect(() => {
     if (mealsQuery.data) {
@@ -55,16 +55,11 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
   const handleDelete = async () => {
     if (!mealToDelete) return;
     setIsDeleting(true);
-    try {
-      await deleteMeal(mealToDelete.id);
-      removeMeal(mealToDelete.id);
-      await mealsQuery.invalidateMeals();
-      setMealToDelete(null);
-    } catch (error) {
-      alert('Ошибка при удалении');
-    } finally {
-      setIsDeleting(false);
-    }
+    deleteMutation.mutate(mealToDelete, {
+      onSuccess: () => setMealToDelete(null),
+      onError: () => alert('Ошибка при удалении'),
+      onSettled: () => setIsDeleting(false)
+    });
   };
 
   const handleRefresh = useCallback(async () => {
