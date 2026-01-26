@@ -68,8 +68,23 @@ async function notifyAdmin(user: any, requestId: string, receiptPath: string) {
         });
 
         console.log('✅ Telegram notification sent successfully to admin');
+        
+        // Delete receipt file after successful send
+        fs.unlink(receiptPath, (err) => {
+            if (err) {
+                console.warn(`⚠️ Failed to delete receipt file ${receiptPath}: ${err.message}`);
+            } else {
+                console.log(`✅ Receipt file deleted: ${receiptPath}`);
+            }
+        });
     } catch (error: any) {
         console.error('❌ Failed to notify admin via Telegram:', error.response?.data || error.message);
+        // Still try to delete file even if send failed
+        fs.unlink(receiptPath, (err) => {
+            if (err) {
+                console.warn(`⚠️ Failed to delete receipt file ${receiptPath}: ${err.message}`);
+            }
+        });
     }
 }
 
