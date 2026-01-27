@@ -45,6 +45,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const scanSteps = [
     "Инициализация нейросети...",
@@ -126,6 +127,10 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
+    // Reset scroll position when modal opens
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
     return () => {
       stopCamera();
       document.body.style.overflow = originalStyle;
@@ -249,7 +254,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
             </button>
           </div>
 
-          <div className="p-6 pt-4">
+          <div ref={contentRef} className="p-6 pt-4 max-h-[calc(100vh-300px)] overflow-y-auto">
             <AnimatePresence mode="wait" initial={false}>
               {isCameraOpen ? (
                 <motion.div key="camera" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative rounded-3xl overflow-hidden aspect-[9/16] bg-black shadow-inner">

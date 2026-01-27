@@ -19,10 +19,15 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
     const [status, setStatus] = useState<string>('NONE'); // NONE, PENDING, REJECTED, APPROVED
     const [requestStep, setRequestStep] = useState<'info' | 'payment' | 'success'>('info');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const scrollRef = useRef<HTMLDivElement>(null);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setMounted(true);
+        // Reset scroll position when modal mounts
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = 0;
+        }
         if (user) {
             checkSubscriptionStatus(user.id).then(data => {
                 if (data.isPremium) setStatus('APPROVED');
@@ -139,7 +144,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                     </button>
                 </div>
 
-                <div className="p-8 pt-10 relative z-10 overflow-y-auto custom-scrollbar">
+                <div ref={scrollRef} className="p-8 pt-10 relative z-10 overflow-y-auto custom-scrollbar">
                     {/* Header */}
                     <div className="flex flex-col items-center mb-8">
                         <div className="w-20 h-20 bg-gradient-to-br from-[#FFD700] to-[#E5C100] rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(255,215,0,0.3)] mb-6 rotate-3">

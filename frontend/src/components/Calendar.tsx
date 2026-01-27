@@ -76,6 +76,11 @@ export default function Calendar() {
     }
   }, [mealsQuery.data, setMeals]);
 
+  // Reset scroll position when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const grid = useMemo(() => {
     const start = startOfMonth(cursor);
     const end = endOfMonth(cursor);

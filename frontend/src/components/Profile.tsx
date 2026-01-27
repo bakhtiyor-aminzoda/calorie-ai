@@ -114,6 +114,11 @@ export default function Profile() {
     }
   }, [user, isEditing]);
 
+  // Reset scroll position when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   if (!user) return null;
 
   const handleSave = async () => {

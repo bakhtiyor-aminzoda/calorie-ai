@@ -32,6 +32,13 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
     }
   }, [mealsQuery.data, setMeals]);
 
+  // Reset scroll position when component mounts
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
+  }, []);
+
   if (!user) return null;
 
   const progress = useMemo(() => 
