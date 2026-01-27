@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { X, Check, Battery, Zap } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { useEffect, useRef } from 'react';
 
 interface FreePlanModalProps {
     onClose: () => void;
@@ -9,6 +10,14 @@ interface FreePlanModalProps {
 
 export default function FreePlanModal({ onClose, onUpgrade }: FreePlanModalProps) {
     const { user } = useStore();
+
+    useEffect(() => {
+        const originalStyle = window.getComputedStyle(document.body).overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = originalStyle;
+        };
+    }, []);
 
     return (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">

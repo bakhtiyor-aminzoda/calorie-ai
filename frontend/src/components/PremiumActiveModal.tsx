@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Crown, Zap, Shield, Sparkles, TrendingUp } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { useEffect } from 'react';
 
 interface PremiumActiveModalProps {
     onClose: () => void;
@@ -9,6 +10,14 @@ interface PremiumActiveModalProps {
 export default function PremiumActiveModal({ onClose }: PremiumActiveModalProps) {
     const user = useStore(state => state.user);
     if (!user) return null;
+
+    useEffect(() => {
+        const originalStyle = window.getComputedStyle(document.body).overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = originalStyle;
+        };
+    }, []);
 
     const features = [
         { icon: Zap, label: 'Безлимитный AI анализ еды' },
