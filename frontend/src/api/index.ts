@@ -65,7 +65,9 @@ export const updateProfile = async (
   userId: string,
   data: Partial<Pick<User, 'firstName' | 'age' | 'gender' | 'heightCm' | 'weightKg' | 'activity' | 'goal'> & { dailyCalorieGoal?: number }>
 ) => {
+  console.log(`[API.updateProfile] Sending data for user ${userId}:`, data);
   const response = await api.patch<{ user: User; recommended?: number | null }>(`/user/${userId}`, data);
+  console.log(`[API.updateProfile] Response:`, response.data);
   return response.data;
 };
 

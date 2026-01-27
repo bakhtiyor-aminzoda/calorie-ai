@@ -14,19 +14,17 @@ import {
 } from '../utils/calories';
 import { useHapticFeedback } from '@telegram-apps/sdk-react';
 import {
-  ChevronRight,
   ChevronLeft,
   Activity,
   Target,
-  User,
   ArrowRight,
-  Flame,
   CheckCircle2,
   Ruler,
   Weight,
   Calendar,
   Zap,
-  Leaf
+  Leaf,
+  Users
 } from 'lucide-react';
 import WheelPicker from './WheelPicker';
 
@@ -113,20 +111,8 @@ export default function Onboarding({ onComplete }: Props) {
   };
 
   const handleInput = (field: keyof typeof formData, value: string) => {
+    console.log(`[Onboarding.handleInput] field=${field}, value=${value}`);
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const applyPreset = (preset: any) => {
-    haptic.selectionChanged();
-    setFormData({
-      firstName: formData.firstName,
-      gender: preset.gender,
-      age: String(preset.age),
-      height: String(preset.height),
-      weight: String(preset.weight),
-      activity: preset.activity,
-      goal: preset.goal
-    });
   };
 
   const ageRange = useMemo(() => Array.from({ length: 83 }, (_, i) => i + 18), []); // 18-100
@@ -137,6 +123,8 @@ export default function Onboarding({ onComplete }: Props) {
 
   const handleSubmit = async () => {
     if (!user || isSubmitting) return; // Prevent double submit
+    console.log('[Onboarding.handleSubmit] Current formData state:', JSON.stringify(formData));
+    console.log('[Onboarding.handleSubmit] Parsed values - age:', age, 'height:', height, 'weight:', weight);
     haptic.notificationOccurred('success');
     setIsSubmitting(true);
 
@@ -204,7 +192,7 @@ export default function Onboarding({ onComplete }: Props) {
     { id: 'SEDENTARY', title: 'Минимальная', desc: 'Сидячая работа', icon: Leaf },
     { id: 'LIGHT', title: 'Лёгкая', desc: 'Прогулки, йога', icon: Activity },
     { id: 'MODERATE', title: 'Средняя', desc: '3-4 тренировки', icon: Zap },
-    { id: 'ACTIVE', title: 'Высокая', desc: 'Спорт 5+ раз', icon: Flame },
+    { id: 'ACTIVE', title: 'Высокая', desc: 'Спорт 5+ раз', icon: Target },
   ] as const;
 
   return (
@@ -263,7 +251,7 @@ export default function Onboarding({ onComplete }: Props) {
                 {/* Name Input */}
                 <div className="px-1">
                   <ModernInput
-                    icon={User}
+                    icon={Users}
                     label="Вас зовут?"
                     placeholder="Имя"
                     value={formData.firstName}
@@ -281,7 +269,7 @@ export default function Onboarding({ onComplete }: Props) {
                         <motion.div layoutId="gender-active" className="absolute inset-0 bg-brand-500 shadow-glow" transition={{ type: "spring", bounce: 0.1, duration: 0.3 }} />
                       )}
                       <span className={cn("relative z-10 flex items-center justify-center gap-2", formData.gender === g ? "text-white" : "text-gray-500")}>
-                        {g === 'MALE' ? <User className="w-4 h-4" /> : <User className="w-4 h-4" />}
+                        {g === 'MALE' ? <Users className="w-4 h-4" /> : <Users className="w-4 h-4" />}
                         {g === 'MALE' ? 'Мужчина' : 'Женщина'}
                       </span>
                     </button>
@@ -396,31 +384,6 @@ export default function Onboarding({ onComplete }: Props) {
                       {recommended}
                     </div>
                     <span className="text-sm font-semibold opacity-90 mt-2">ккал / день</span>
-                  </div>
-                </div>
-
-                {/* Presets */}
-                <div className="mt-4">
-                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-2">Быстрый старт</div>
-                  <div className="space-y-3">
-                    {[
-                      { label: 'Офисный работник', sub: 'Сидячая работа', icon: User, preset: { gender: 'MALE', age: 30, height: 178, weight: 75, activity: 'SEDENTARY', goal: 'MAINTAIN' } },
-                      { label: 'Снижение веса', sub: 'Умеренная активность', icon: Flame, preset: { gender: 'FEMALE', age: 26, height: 165, weight: 65, activity: 'MODERATE', goal: 'LOSS' } },
-                    ].map((p, i) => (
-                      <button key={i} onClick={() => { applyPreset(p.preset) }}
-                        className="group w-full flex items-center gap-4 p-4 rounded-3xl bg-white dark:bg-white/5 border border-transparent hover:border-brand-500/50 hover:bg-brand-50/50 dark:hover:bg-brand-500/10 transition-all active:scale-[0.98]">
-                        <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-white/10 flex items-center justify-center text-gray-500 group-hover:text-brand-500 group-hover:bg-brand-100 dark:group-hover:bg-brand-500/20 transition-colors">
-                          <p.icon className="w-6 h-6" />
-                        </div>
-                        <div className="text-left">
-                          <div className="font-bold text-base text-gray-900 dark:text-gray-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{p.label}</div>
-                          <div className="text-xs font-medium text-gray-500 group-hover:text-brand-500/70 transition-colors">{p.sub}</div>
-                        </div>
-                        <div className="ml-auto w-8 h-8 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-300 group-hover:border-brand-200 group-hover:text-brand-500 transition-all">
-                          <ChevronRight className="w-4 h-4 ml-0.5" />
-                        </div>
-                      </button>
-                    ))}
                   </div>
                 </div>
               </motion.div>

@@ -23,13 +23,14 @@ const WheelPicker = memo(function WheelPicker({ items, value, onChange, label, h
     useEffect(() => {
         if (containerRef.current) {
             const idx = items.indexOf(value as never);
+            console.log(`[WheelPicker.useEffect] value=${value}, found idx=${idx}, items=${JSON.stringify(items)}`);
             if (idx !== -1) {
                 // Initial snap without animation for instant load
                 containerRef.current.scrollTop = idx * itemHeight;
                 setActiveIndex(idx);
             }
         }
-    }, [height]); // Only on mount/height change
+    }, [height, value, items]); // Sync when value changes
 
     const handleScroll = () => {
         if (!containerRef.current) return;
@@ -47,6 +48,7 @@ const WheelPicker = memo(function WheelPicker({ items, value, onChange, label, h
     useEffect(() => {
         const timer = setTimeout(() => {
             if (items[activeIndex] !== value) {
+                console.log(`[WheelPicker] onChange triggered - activeIndex=${activeIndex}, newValue=${items[activeIndex]}, items[activeIndex]=${items[activeIndex]}`);
                 onChange(items[activeIndex]);
                 haptic.selectionChanged();
             }
