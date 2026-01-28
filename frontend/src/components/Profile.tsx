@@ -372,7 +372,7 @@ export default function Profile() {
                 <p className="font-bold text-lg leading-tight">Подключить<br />Premium</p>
               </div>
               <button className="bg-white/90 text-[#5C4D00] px-4 py-2 rounded-xl text-xs font-black shadow-lg">
-                90 TJS / 3М
+                30 TJS / 3М
               </button>
             </div>
           )}

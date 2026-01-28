@@ -191,7 +191,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                 <div className="bg-white/5 border border-white/5 rounded-2xl p-5 mb-8">
                                     <div className="flex justify-between items-center mb-4">
                                         <span className="text-white/60 font-bold uppercase text-[10px] tracking-widest">Тариф PRO</span>
-                                        <span className="text-white font-black">90 TJS / 3 мес</span>
+                                        <span className="text-white font-black">30 TJS / 3 мес</span>
                                     </div>
                                     <button
                                         onClick={() => setRequestStep('payment')}
@@ -210,7 +210,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                     <div className="space-y-4 text-white/80 text-sm leading-relaxed mb-6">
                                         <div className="flex gap-3">
                                             <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-500 flex items-center justify-center shrink-0 font-bold text-xs">1</div>
-                                            <p>Переведите <b>90 TJS</b> на одну из карт Visa:</p>
+                                            <p>Переведите <b>30 TJS</b> на одну из карт Visa:</p>
                                         </div>
                                         <div className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-2">
                                             <div className="flex justify-between">
