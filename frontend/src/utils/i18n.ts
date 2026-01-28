@@ -30,6 +30,9 @@ export const translations = {
     'onboarding.goal.gain': 'Набрать',
     'onboarding.recommendedCalories': 'Ваша норма',
     'onboarding.perDay': 'ккал / день',
+    // Subscription
+    'subscription.price': '30 TJS / 3 мес',
+    'subscription.pricePerMonth': '10 TJS / мес',
   },
   tj: {
     // Onboarding
@@ -62,6 +65,9 @@ export const translations = {
     'onboarding.goal.gain': 'Афзоиш',
     'onboarding.recommendedCalories': 'Нормаи шумо',
     'onboarding.perDay': 'калория / рӯз',
+    // Subscription
+    'subscription.price': '30 TJS / 3 мас',
+    'subscription.pricePerMonth': '10 TJS / мас',
   },
   uz: {
     // Onboarding
@@ -94,6 +100,9 @@ export const translations = {
     'onboarding.goal.gain': "Koʻpaytirib",
     'onboarding.recommendedCalories': 'Sizning norma',
     'onboarding.perDay': 'kkal / kun',
+    // Subscription
+    'subscription.price': '38888 soʻm / 3 oy',
+    'subscription.pricePerMonth': '12962 soʻm / oy',
   }
 } as const;
 

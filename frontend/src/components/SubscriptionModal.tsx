@@ -4,6 +4,7 @@ import { X, Check, Star, Zap, Shield, Crown, Image as ImageIcon, Upload } from '
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { requestSubscription, checkSubscriptionStatus } from '../api';
+import { t } from '../utils/i18n';
 import confetti from 'canvas-confetti';
 
 interface SubscriptionModalProps {
@@ -11,7 +12,7 @@ interface SubscriptionModalProps {
 }
 
 export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
-    const { user, setUser } = useStore();
+    const { user, setUser, language } = useStore();
     const [loading, setLoading] = useState(false);
     const [receiptFile, setReceiptFile] = useState<File | null>(null);
     const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
@@ -191,7 +192,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                 <div className="bg-white/5 border border-white/5 rounded-2xl p-5 mb-8">
                                     <div className="flex justify-between items-center mb-4">
                                         <span className="text-white/60 font-bold uppercase text-[10px] tracking-widest">Тариф PRO</span>
-                                        <span className="text-white font-black">30 TJS / 3 мес</span>
+                                        <span className="text-white font-black">{t('subscription.price', language as any)}</span>
                                     </div>
                                     <button
                                         onClick={() => setRequestStep('payment')}
@@ -208,28 +209,57 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                 <div className="bg-white/5 border border-[#FFD700]/20 rounded-[2rem] p-6 mb-6">
                                     <h3 className="text-[#FFD700] font-bold text-sm uppercase tracking-wider mb-4">Инструкция по оплате</h3>
                                     <div className="space-y-4 text-white/80 text-sm leading-relaxed mb-6">
-                                        <div className="flex gap-3">
-                                            <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-500 flex items-center justify-center shrink-0 font-bold text-xs">1</div>
-                                            <p>Переведите <b>30 TJS</b> на одну из карт Visa:</p>
-                                        </div>
-                                        <div className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-2">
-                                            <div className="flex justify-between">
-                                                <span className="opacity-60 text-xs">Visa (Alif Bank)</span>
-                                                <span className="font-mono text-brand-400 font-bold select-all">4405 0000 1234 5678</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="opacity-60 text-xs">Visa (Milliy Bank)</span>
-                                                <span className="font-mono text-brand-400 font-bold select-all">4276 1500 2000 7890</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="opacity-60 text-xs">Visa (Tojik Bank)</span>
-                                                <span className="font-mono text-brand-400 font-bold select-all">4111 2222 3333 4444</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-3">
-                                            <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-500 flex items-center justify-center shrink-0 font-bold text-xs">2</div>
-                                            <p>Сделайте <b>скриншот чека</b> и прикрепите его ниже:</p>
-                                        </div>
+                                        {language === 'uz' ? (
+                                            <>
+                                                <div className="flex gap-3">
+                                                    <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-500 flex items-center justify-center shrink-0 font-bold text-xs">1</div>
+                                                    <p>Quyidagi Visa kartalaridan biriga <b>38888 soʻm</b> oʻtkazing:</p>
+                                                </div>
+                                                <div className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-2">
+                                                    <div className="flex justify-between">
+                                                        <span className="opacity-60 text-xs">Visa (Alif Bank)</span>
+                                                        <span className="font-mono text-brand-400 font-bold select-all">4405 0000 1234 5678</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="opacity-60 text-xs">Visa (Milliy Bank)</span>
+                                                        <span className="font-mono text-brand-400 font-bold select-all">4276 1500 2000 7890</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="opacity-60 text-xs">Visa (Tojik Bank)</span>
+                                                        <span className="font-mono text-brand-400 font-bold select-all">4111 2222 3333 4444</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-3">
+                                                    <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-500 flex items-center justify-center shrink-0 font-bold text-xs">2</div>
+                                                    <p><b>Chekni skrinshot</b> qilib quyidaga joylang:</p>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="flex gap-3">
+                                                    <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-500 flex items-center justify-center shrink-0 font-bold text-xs">1</div>
+                                                    <p>Переведите <b>30 TJS</b> на одну из карт Visa:</p>
+                                                </div>
+                                                <div className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-2">
+                                                    <div className="flex justify-between">
+                                                        <span className="opacity-60 text-xs">Visa (Alif Bank)</span>
+                                                        <span className="font-mono text-brand-400 font-bold select-all">4405 0000 1234 5678</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="opacity-60 text-xs">Visa (Milliy Bank)</span>
+                                                        <span className="font-mono text-brand-400 font-bold select-all">4276 1500 2000 7890</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="opacity-60 text-xs">Visa (Tojik Bank)</span>
+                                                        <span className="font-mono text-brand-400 font-bold select-all">4111 2222 3333 4444</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-3">
+                                                    <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-500 flex items-center justify-center shrink-0 font-bold text-xs">2</div>
+                                                    <p>Сделайте <b>скриншот чека</b> и прикрепите его ниже:</p>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
 
                                     <div className="space-y-3">
