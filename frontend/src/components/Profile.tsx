@@ -5,7 +5,6 @@ import WheelPicker from './WheelPicker';
 import { ChevronRight, Globe, Moon, Shield, Zap, Ruler, Weight, Calendar, Activity, Check, X, Calculator, Edit2, Save, Coffee, Dumbbell, Flame, Trophy, TrendingDown, Minus, TrendingUp, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SubscriptionModal from './SubscriptionModal';
-import FreePlanModal from './FreePlanModal';
 import PremiumActiveModal from './PremiumActiveModal';
 import { calculateBMR, calculateTDEE, calculateTargetCalories, calculateBMI, type Gender, type ActivityLevel, type GoalType } from '../utils/calories';
 
@@ -73,7 +72,6 @@ export default function Profile() {
   const [isSaving, setIsSaving] = useState(false);
   const [showSubscription, setShowSubscription] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [showFreeModal, setShowFreeModal] = useState(false);
   const [activeField, setActiveField] = useState<string | null>(null);
 
   // Form State
@@ -251,10 +249,10 @@ export default function Profile() {
               </span>
             ) : (
               <button
-                onClick={() => setShowFreeModal(true)}
-                className="text-[10px] bg-gray-100 dark:bg-white/10 text-tg-hint px-2 py-0.5 rounded-full font-bold tracking-wide hover:bg-brand-500 hover:text-white transition-colors flex items-center gap-1"
+                onClick={() => setShowSubscription(true)}
+                className="text-[10px] bg-gradient-to-r from-brand-400 to-brand-600 text-white px-2 py-0.5 rounded-full font-bold tracking-wide hover:opacity-80 transition-colors flex items-center gap-1"
               >
-                FREE <ChevronRight className="w-2 h-2" />
+                UPGRADE <ChevronRight className="w-2 h-2" />
               </button>
             )}
           </div>
@@ -269,11 +267,8 @@ export default function Profile() {
             fetchStatus(); // Refresh status on close
           }} />
         )}
-        {showFreeModal && (
-          <FreePlanModal
-            onClose={() => setShowFreeModal(false)}
-            onUpgrade={() => setShowSubscription(true)}
-          />
+        {showPremiumModal && (
+          <PremiumActiveModal onClose={() => setShowPremiumModal(false)} />
         )}
       </AnimatePresence>
 
@@ -377,7 +372,7 @@ export default function Profile() {
                 <p className="font-bold text-lg leading-tight">Подключить<br />Premium</p>
               </div>
               <button className="bg-white/90 text-[#5C4D00] px-4 py-2 rounded-xl text-xs font-black shadow-lg">
-                30 TJS
+                90 TJS / 3М
               </button>
             </div>
           )}

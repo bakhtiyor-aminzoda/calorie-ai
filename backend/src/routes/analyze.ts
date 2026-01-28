@@ -18,32 +18,12 @@ router.post('/', upload.single('image'), async (req, res) => {
             return res.status(400).json({ error: 'User ID required for analysis' });
         }
 
-        // 1. Check Rate Limits
+        // 1. Check Premium Subscription
         const user = await prisma.user.findUnique({ where: { id: userId } });
         if (!user) return res.status(404).json({ error: 'User not found' });
 
         if (!user.isPremium) {
-            const now = new Date();
-            const lastRequest = new Date(user.lastRequestDate);
-            const isSameDay = now.getDate() === lastRequest.getDate() &&
-                now.getMonth() === lastRequest.getMonth() &&
-                now.getFullYear() === lastRequest.getFullYear();
-
-            // Reset if new day
-            let count = isSameDay ? user.dailyRequestCount : 0;
-
-            if (count >= 3) {
-                return res.status(403).json({ error: 'Daily limit reached', code: 'LIMIT_REACHED' });
-            }
-
-            // Update counter
-            await prisma.user.update({
-                where: { id: userId },
-                data: {
-                    dailyRequestCount: count + 1,
-                    lastRequestDate: now
-                }
-            });
+            return res.status(403).json({ error: 'Premium subscription required', code: 'PREMIUM_REQUIRED' });
         }
 
         // Convert buffer to base64 for OpenAI

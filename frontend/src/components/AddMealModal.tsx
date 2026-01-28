@@ -156,7 +156,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
       const result = await analyzeImage(user.id, targetFile);
       setAnalysisResult(result);
     } catch (error: any) {
-      if (error?.response?.status === 403 || error?.response?.data?.code === 'LIMIT_REACHED') {
+      if (error?.response?.status === 403 || error?.response?.data?.code === 'PREMIUM_REQUIRED' || error?.response?.data?.code === 'LIMIT_REACHED') {
         setIsAnalyzing(false);
         setShowSubscription(true);
         return;
