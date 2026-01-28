@@ -191,7 +191,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                 <div className="bg-white/5 border border-white/5 rounded-2xl p-5 mb-8">
                                     <div className="flex justify-between items-center mb-4">
                                         <span className="text-white/60 font-bold uppercase text-[10px] tracking-widest">Тариф PRO</span>
-                                        <span className="text-white font-black">30 TJS / мес</span>
+                                        <span className="text-white font-black">90 TJS / 3 мес</span>
                                     </div>
                                     <button
                                         onClick={() => setRequestStep('payment')}
@@ -210,16 +210,20 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                     <div className="space-y-4 text-white/80 text-sm leading-relaxed mb-6">
                                         <div className="flex gap-3">
                                             <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-500 flex items-center justify-center shrink-0 font-bold text-xs">1</div>
-                                            <p>Переведите <b>30 TJS</b> на карту или кошелек:</p>
+                                            <p>Переведите <b>90 TJS</b> на одну из карт Visa:</p>
                                         </div>
                                         <div className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-2">
                                             <div className="flex justify-between">
-                                                <span className="opacity-60 text-xs">Карта Alif / DC</span>
-                                                <span className="font-mono text-brand-400 font-bold select-all">5045 1200 1234 5678</span>
+                                                <span className="opacity-60 text-xs">Visa (Alif Bank)</span>
+                                                <span className="font-mono text-brand-400 font-bold select-all">4405 0000 1234 5678</span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="opacity-60 text-xs">Кошелек (Моб. банк)</span>
-                                                <span className="font-mono text-brand-400 font-bold select-all">+992 900 00 00 00</span>
+                                                <span className="opacity-60 text-xs">Visa (Milliy Bank)</span>
+                                                <span className="font-mono text-brand-400 font-bold select-all">4276 1500 2000 7890</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="opacity-60 text-xs">Visa (Tojik Bank)</span>
+                                                <span className="font-mono text-brand-400 font-bold select-all">4111 2222 3333 4444</span>
                                             </div>
                                         </div>
                                         <div className="flex gap-3">

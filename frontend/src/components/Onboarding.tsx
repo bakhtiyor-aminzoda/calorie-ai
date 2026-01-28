@@ -3,6 +3,7 @@ import { useStore } from '../store/useStore';
 import { updateProfile, updateCalorieGoal } from '../api';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { cn } from '../utils/cn';
+import { t } from '../utils/i18n';
 import {
   type Gender,
   type ActivityLevel,
@@ -39,10 +40,10 @@ const slideVariants: Variants = {
 };
 
 export default function Onboarding({ onComplete }: Props) {
-  const { user, setUser } = useStore();
+  const { user, setUser, language, setLanguage } = useStore();
   const haptic = useHapticFeedback();
 
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(-1); // -1 for language selection
   const [direction, setDirection] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -91,9 +92,15 @@ export default function Onboarding({ onComplete }: Props) {
   const isValidStep2 = !!formData.goal;
 
   const stepsTotal = 3;
-  const progress = ((step + 1) / stepsTotal) * 100;
+  const actualStep = step + 1; // For display purposes (0 = language, 1-3 = onboarding steps)
+  const displayProgress = step === -1 ? 0 : ((actualStep) / stepsTotal) * 100;
 
   const next = () => {
+    if (step === -1) {
+      // Language selection - proceed to step 0
+      setStep(0);
+      return;
+    }
     if (step === 0 && !isValidStep0) {
       setTouched({ age: true, height: true, weight: true });
       haptic.notificationOccurred('error');
@@ -107,7 +114,12 @@ export default function Onboarding({ onComplete }: Props) {
   const prev = () => {
     haptic.impactOccurred('medium');
     setDirection(-1);
-    setStep(s => Math.max(0, s - 1));
+    if (step === 0) {
+      // Go back to language selection
+      setStep(-1);
+    } else {
+      setStep(s => Math.max(-1, s - 1));
+    }
   };
 
   const handleInput = (field: keyof typeof formData, value: string) => {
@@ -208,7 +220,7 @@ export default function Onboarding({ onComplete }: Props) {
       <div className="relative z-10 flex flex-col h-full p-5 max-w-md mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 pt-2">
-          <button onClick={prev} disabled={step === 0} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-0 transition-all">
+          <button onClick={prev} disabled={step === -1} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-0 transition-all">
             <ChevronLeft className="w-6 h-6" />
           </button>
           <div className="flex gap-1.5">
@@ -231,17 +243,49 @@ export default function Onboarding({ onComplete }: Props) {
               transition={{ duration: 0.2 }}
               className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400"
             >
-              {step === 0 ? "О вас" : step === 1 ? "Активность" : "Ваша цель"}
+              {step === -1 ? "Язык" : step === 0 ? "О вас" : step === 1 ? "Активность" : "Ваша цель"}
             </motion.h1>
           </AnimatePresence>
           <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-            Шаг {step + 1} из {stepsTotal}
+            {step === -1 ? "Выберите язык" : `Шаг ${step + 1} из ${stepsTotal}`}
           </p>
         </div>
 
         {/* Main Card Area */}
         <div className="flex-1 relative">
           <AnimatePresence initial={false} custom={direction} mode='wait'>
+
+            {/* STEP -1: LANGUAGE SELECTION */}
+            {step === -1 && (
+              <motion.div key="language" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit"
+                style={{ willChange: 'transform, opacity' }}
+                className="absolute inset-0 flex flex-col gap-5 overflow-y-auto no-scrollbar pb-4">
+                <div className="space-y-3 mt-4">
+                  {[
+                    { code: 'ru', name: '🇷🇺 Русский', flag: '🇷🇺' },
+                    { code: 'tj', name: '🇹🇯 Тоҷикӣ', flag: '🇹🇯' },
+                    { code: 'uz', name: '🇺🇿 Oʻzbekcha', flag: '🇺🇿' }
+                  ].map(lang => (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        setLanguage(lang.code as 'ru' | 'tj' | 'uz');
+                        haptic.selectionChanged();
+                        next();
+                      }}
+                      className={cn(
+                        "w-full p-4 rounded-2xl border-2 transition-all text-left font-semibold",
+                        language === lang.code
+                          ? "border-brand-500 bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-300"
+                          : "border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900 text-gray-900 dark:text-white hover:border-brand-300"
+                      )}
+                    >
+                      <div className="text-lg">{lang.name}</div>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
             {/* STEP 0: BASICS */}
             {step === 0 && (
@@ -397,7 +441,7 @@ export default function Onboarding({ onComplete }: Props) {
           {step < stepsTotal - 1 ? (
             <button onClick={next} disabled={step === 0 && !isValidStep0}
               className="w-full py-5 rounded-[20px] bg-brand-600 text-white font-bold text-xl shadow-[0_10px_30px_-5px_rgba(85,126,255,0.4)] hover:shadow-[0_15px_35px_-5px_rgba(85,126,255,0.5)] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:shadow-none relative overflow-hidden">
-              <span className="relative z-10">Далее</span>
+              <span className="relative z-10">{step === -1 ? 'Продолжить' : 'Далее'}</span>
               <ArrowRight className="w-6 h-6 relative z-10 opacity-80" />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 translate-x-[-150%] animate-[shimmer_2s_infinite]" />
             </button>

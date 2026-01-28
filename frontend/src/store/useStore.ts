@@ -8,9 +8,11 @@ interface AppState {
   meals: Meal[];
   totals: Totals;
   selectedDate: Date;
+  language: 'ru' | 'tj' | 'uz'; // Language setting
   setUser: (user: User) => void;
   setMeals: (meals: Meal[], totals: Totals) => void;
   setSelectedDate: (date: Date) => void;
+  setLanguage: (lang: 'ru' | 'tj' | 'uz') => void;
   addMeal: (meal: Meal) => void;
   removeMeal: (mealId: string) => void;
 }
@@ -20,9 +22,11 @@ export const useStore = create<AppState>((set) => ({
   meals: [],
   totals: { calories: 0, protein: 0, fat: 0, carbs: 0 },
   selectedDate: new Date(),
+  language: 'ru',
   setUser: (user) => set({ user }),
   setMeals: (meals, totals) => set({ meals, totals }),
   setSelectedDate: (date) => set({ selectedDate: date }),
+  setLanguage: (language) => set({ language }),
   addMeal: (meal) => set((state) => {
     const newMeals = [meal, ...state.meals];
     const newTotals = {
