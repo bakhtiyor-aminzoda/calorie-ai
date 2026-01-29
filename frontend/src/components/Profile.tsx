@@ -52,6 +52,8 @@ const StatItem = memo(({ icon: Icon, label, value, editingContent, isEditing, is
 export default function Profile() {
   const user = useStore(state => state.user);
   const setUser = useStore(state => state.setUser);
+  const language = useStore(state => state.language);
+  const setLanguage = useStore(state => state.setLanguage);
 
   const ACTIVITY_LABELS: Record<string, string> = {
     SEDENTARY: 'Минимальная',
@@ -81,7 +83,8 @@ export default function Profile() {
     age: 25,
     gender: 'MALE',
     activity: 'MODERATE',
-    target: 'MAINTAIN'
+    target: 'MAINTAIN',
+    language: 'ru' as 'ru' | 'tj' | 'uz'
   });
 
   const ACTIVITY_OPTIONS = useMemo(() => [
@@ -107,10 +110,11 @@ export default function Profile() {
         age: user.age || 25,
         gender: user.gender || 'MALE',
         activity: user.activity || 'MODERATE',
-        target: user.goal || 'MAINTAIN'
+        target: user.goal || 'MAINTAIN',
+        language: language
       });
     }
-  }, [user, isEditing]);
+  }, [user, isEditing, language]);
 
   // Reset scroll position when component mounts
   useEffect(() => {
@@ -139,6 +143,11 @@ export default function Profile() {
       };
 
       await updateProfile(user.id, apiData);
+
+      // Update language in global state
+      if (formData.language !== language) {
+        setLanguage(formData.language);
+      }
 
       // 3. Update Calorie Goal Automatically
       const updatedUser = await updateCalorieGoal(user.id, recommended);
@@ -498,6 +507,42 @@ export default function Profile() {
                       <div className="font-bold text-sm leading-tight">{opt.label}</div>
                       <div className="text-xs opacity-60 mt-0.5 font-medium">{opt.description}</div>
                     </div>
+                    {isSelected && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-500">
+                        <Check className="w-5 h-5" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          }
+        />
+        <StatItem
+          icon={Globe}
+          label="Язык"
+          value={formData.language === 'ru' ? 'Русский' : formData.language === 'tj' ? 'Таджикский' : 'Узбекский'}
+          isEditing={isEditing}
+          isActive={activeField === 'language'}
+          onToggle={() => setActiveField(activeField === 'language' ? null : 'language')}
+          editingContent={
+            <div className="flex flex-col gap-2">
+              {[
+                { value: 'ru', label: '🇷🇺 Русский' },
+                { value: 'tj', label: '🇹🇯 Таджикский' },
+                { value: 'uz', label: '🇺🇿 Узбекский' }
+              ].map((opt) => {
+                const isSelected = formData.language === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => setFormData({ ...formData, language: opt.value as 'ru' | 'tj' | 'uz' })}
+                    className={`relative w-full p-3 rounded-xl flex items-center gap-3 transition-all duration-300 border ${isSelected
+                      ? 'bg-brand-500/20 border-brand-500 text-brand-500'
+                      : 'bg-white/5 border-white/10 text-white hover:border-brand-500/50'
+                      }`}
+                  >
+                    <span className="font-bold text-sm leading-tight">{opt.label}</span>
                     {isSelected && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-500">
                         <Check className="w-5 h-5" />
