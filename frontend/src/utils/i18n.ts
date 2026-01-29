@@ -631,15 +631,21 @@ export const translations = {
 } as const;
 
 export function t(key: string, language: Language = 'ru'): string {
+  const langTable = translations[language] ?? translations.ru;
+  const direct = (langTable as Record<string, string>)[key];
+  if (direct !== undefined && direct !== null) return String(direct);
+
   const keys = key.split('.');
-  let value: any = translations[language] ?? translations.ru;
+  let value: any = langTable as any;
   for (const k of keys) {
     value = value?.[k];
   }
 
   if (value === undefined || value === null) {
     if (language !== 'ru') {
-      let fallback: any = translations.ru;
+      const fallbackDirect = (translations.ru as Record<string, string>)[key];
+      if (fallbackDirect !== undefined && fallbackDirect !== null) return String(fallbackDirect);
+      let fallback: any = translations.ru as any;
       for (const k of keys) {
         fallback = fallback?.[k];
       }
