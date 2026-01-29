@@ -385,7 +385,7 @@ export default function Profile() {
                   <Crown className="w-4 h-4 fill-current" />
                   <span className="font-black tracking-wide text-xs uppercase opacity-80">Calorie AI Pro</span>
                 </div>
-                <p className="font-bold text-lg leading-tight">{t('profile.connectPremium', language)}<br />Premium</p>
+                <p className="font-bold text-lg leading-tight">{t('profile.connectPremium', language)}<br /></p>
               </div>
               <button className="bg-white/90 text-[#5C4D00] px-4 py-2 rounded-xl text-xs font-black shadow-lg">
                 {t('subscription.price', language)}
