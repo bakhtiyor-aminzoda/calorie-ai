@@ -265,10 +265,10 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
             </button>
           </div>
 
-          <div ref={contentRef} className="p-6 pt-4 flex-1 overflow-y-auto">
+          <div ref={contentRef} className={`flex-1 ${isCameraOpen ? 'overflow-hidden p-4' : 'p-6 pt-4 overflow-y-auto'}`}>
             <AnimatePresence mode="wait" initial={false}>
               {isCameraOpen ? (
-                <motion.div key="camera" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative rounded-3xl overflow-hidden aspect-[9/16] bg-black shadow-inner">
+                <motion.div key="camera" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative rounded-3xl overflow-hidden h-full bg-black shadow-inner">
                   <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
 
                   {/* Cinematic Vignette */}
