@@ -225,6 +225,13 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
     }
   };
 
+  // Determine modal height based on state
+  const getModalHeight = () => {
+    if (isCameraOpen) return "h-[90svh] sm:h-[85vh] max-h-[90svh]";
+    if (!preview && !analysisResult) return "h-[40svh] sm:h-[32vh] max-h-[40svh]"; // compact for source picker
+    return "h-[90svh] sm:h-[85vh] max-h-[90svh]"; // expanded for preview/analysis
+  };
+
   return (
     <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center overflow-hidden">
       <motion.div
@@ -241,7 +248,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
         initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: "spring", damping: 30, stiffness: 300, mass: 0.8 }}
         style={{ willChange: 'transform' }}
-        className="relative w-full sm:max-w-md bg-[#F2F4F8] dark:bg-[#1C1C1E] rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl h-[90svh] sm:h-[85vh] max-h-[90svh] flex flex-col"
+        className={`relative w-full sm:max-w-md bg-[#F2F4F8] dark:bg-[#1C1C1E] rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col ${getModalHeight()}`}
       >
         <ComponentErrorBoundary fallback={<div className="p-6 text-red-500">{t('addMeal.modalError', language)}</div>}>
           <div className="flex items-center justify-between p-6 pb-2">
