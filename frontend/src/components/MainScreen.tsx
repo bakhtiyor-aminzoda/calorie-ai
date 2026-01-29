@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
+import { t, localeForLanguage } from '../utils/i18n';
 import ProgressCircle from './ProgressCircle';
 import MealCard from './MealCard';
 import { MealListSkeleton } from './SkeletonLoader';
@@ -11,6 +12,7 @@ import { useDeleteMealMutation } from '../hooks/useDeleteMealMutation';
 
 export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => void }) {
   const user = useStore(state => state.user);
+  const language = useStore(state => state.language);
   const meals = useStore(state => state.meals);
   const totals = useStore(state => state.totals);
   const selectedDate = useStore(state => state.selectedDate);
@@ -57,7 +59,9 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
   );
 
   const isToday = new Date().toDateString() === new Date(selectedDate).toDateString();
-  const dateTitle = isToday ? 'Сегодня' : new Date(selectedDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+  const dateTitle = isToday
+    ? t('common.today', language)
+    : new Date(selectedDate).toLocaleDateString(localeForLanguage(language), { day: 'numeric', month: 'long' });
 
   const handleDelete = async () => {
     if (!mealToDelete) return;
@@ -153,7 +157,7 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
             </div>
             <div>
               <p className="text-sm font-medium text-tg-hint uppercase tracking-wide leading-none mb-0.5">{dateTitle}</p>
-              <h1 className="text-xl font-bold text-tg-text leading-none">Обзор калорий</h1>
+              <h1 className="text-xl font-bold text-tg-text leading-none">{t('main.overviewTitle', language)}</h1>
             </div>
           </div>
           <div className="bg-brand-500/10 dark:bg-brand-500/20 text-brand-500 p-2 rounded-full">
@@ -172,10 +176,10 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
           <div className="relative z-10 flex items-center justify-between gap-6">
             <div className="flex-1">
               <p className="text-white/80 text-sm font-medium mb-1">
-                {isOverLimit ? 'Перебор' : 'Осталось'}
+                {isOverLimit ? t('main.over', language) : t('main.remaining', language)}
               </p>
               <div className="text-4xl font-black tracking-tight">{diff}</div>
-              <p className="text-xs text-white/60 mt-1 font-medium">ккал из {user.dailyCalorieGoal}</p>
+              <p className="text-xs text-white/60 mt-1 font-medium">{t('common.kcalOf', language)} {user.dailyCalorieGoal}</p>
             </div>
 
             {/* Custom Progress Circle (White theme) & Rotating DOT */}
@@ -211,11 +215,11 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
 
           {/* Macros Grid */}
           <div className="relative z-10 grid grid-cols-3 gap-2 mt-6">
-            {[
-              { label: 'Белки', val: totals.protein, color: 'bg-white/10 dark:bg-white/5' },
-              { label: 'Жиры', val: totals.fat, color: 'bg-white/10 dark:bg-white/5' },
-              { label: 'Угли', val: totals.carbs, color: 'bg-white/10 dark:bg-white/5' },
-            ].map((m, i) => (
+              {[
+                { label: t('common.protein', language), val: totals.protein, color: 'bg-white/10 dark:bg-white/5' },
+                { label: t('common.fat', language), val: totals.fat, color: 'bg-white/10 dark:bg-white/5' },
+                { label: t('common.carbs', language), val: totals.carbs, color: 'bg-white/10 dark:bg-white/5' },
+              ].map((m, i) => (
               <div key={i} className={`rounded-xl ${m.color} p-2 text-center`}>
                 <div className="text-lg font-bold">{m.val}г</div>
                 <div className="text-[10px] uppercase tracking-wider opacity-70">{m.label}</div>
@@ -228,7 +232,7 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
       {/* Meals List */}
       <section className="px-5">
         <div className="flex items-center justify-between mb-4 px-1">
-          <h2 className="text-lg font-bold text-tg-text">Приемы пищи</h2>
+          <h2 className="text-lg font-bold text-tg-text">{t('main.mealsTitle', language)}</h2>
           <span className="text-xs font-medium text-tg-hint bg-gray-100 dark:bg-white/5 px-2 py-1 rounded-lg">{meals.length}</span>
         </div>
 
@@ -249,9 +253,9 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
                       <Utensils className="w-10 h-10 text-brand-500 opacity-40" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-bold text-tg-text mb-1">Ни одной записи</h3>
+                  <h3 className="text-lg font-bold text-tg-text mb-1">{t('main.emptyTitle', language)}</h3>
                   <p className="text-sm text-tg-hint max-w-[200px] mx-auto">
-                    Сфотографируй завтрак или обед, чтобы начать расчет
+                    {t('main.emptyText', language)}
                   </p>
                 </motion.div>
               ) : (
@@ -274,8 +278,8 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
         isOpen={!!mealToDelete}
         onClose={() => setMealToDelete(null)}
         onConfirm={handleDelete}
-        title="Удалить запись?"
-        message={`Вы уверены, что хотите удалить "${mealToDelete?.name}"? Это действие нельзя отменить.`}
+        title={t('common.deleteTitle', language)}
+        message={t('common.deleteMessage', language).replace('{name}', mealToDelete?.name || '')}
       />
     </div>
   );

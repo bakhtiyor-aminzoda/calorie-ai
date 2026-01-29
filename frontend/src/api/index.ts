@@ -13,7 +13,7 @@ export interface User {
   lastName: string | null;
   username: string | null;
   dailyCalorieGoal: number;
-  language?: string;
+  language?: 'ru' | 'tj' | 'uz';
   age?: number | null;
   gender?: 'MALE' | 'FEMALE' | null;
   heightCm?: number | null;
@@ -64,7 +64,7 @@ export const updateCalorieGoal = async (userId: string, goal: number) => {
 
 export const updateProfile = async (
   userId: string,
-  data: Partial<Pick<User, 'firstName' | 'age' | 'gender' | 'heightCm' | 'weightKg' | 'activity' | 'goal'> & { dailyCalorieGoal?: number }>
+  data: Partial<Pick<User, 'firstName' | 'age' | 'gender' | 'heightCm' | 'weightKg' | 'activity' | 'goal' | 'language'> & { dailyCalorieGoal?: number }>
 ) => {
   console.log(`[API.updateProfile] Sending data for user ${userId}:`, data);
   const response = await api.patch<{ user: User; recommended?: number | null }>(`/user/${userId}`, data);

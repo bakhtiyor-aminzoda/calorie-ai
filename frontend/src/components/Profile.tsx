@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, memo, useCallback } from 'react';
 import { useStore } from '../store/useStore';
 import { updateCalorieGoal, updateProfile, checkSubscriptionStatus } from '../api';
+import { t } from '../utils/i18n';
 import WheelPicker from './WheelPicker';
 import { ChevronRight, Globe, Moon, Shield, Zap, Ruler, Weight, Calendar, Activity, Check, X, Calculator, Edit2, Save, Coffee, Dumbbell, Flame, Trophy, TrendingDown, Minus, TrendingUp, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -56,17 +57,17 @@ export default function Profile() {
   const setLanguage = useStore(state => state.setLanguage);
 
   const ACTIVITY_LABELS: Record<string, string> = {
-    SEDENTARY: 'Минимальная',
-    LIGHT: 'Лёгкая',
-    MODERATE: 'Средняя',
-    ACTIVE: 'Высокая',
-    VERY_ACTIVE: 'Экстремальная'
+    SEDENTARY: t('profile.activity.sedentary', language),
+    LIGHT: t('profile.activity.light', language),
+    MODERATE: t('profile.activity.moderate', language),
+    ACTIVE: t('profile.activity.active', language),
+    VERY_ACTIVE: t('profile.activity.veryActive', language)
   };
 
   const GOAL_LABELS: Record<string, string> = {
-    LOSS: 'Сбросить вес',
-    MAINTAIN: 'Поддерживать',
-    GAIN: 'Набрать массу'
+    LOSS: t('profile.goal.loss', language),
+    MAINTAIN: t('profile.goal.maintain', language),
+    GAIN: t('profile.goal.gain', language)
   };
 
   // Mode State
@@ -88,18 +89,18 @@ export default function Profile() {
   });
 
   const ACTIVITY_OPTIONS = useMemo(() => [
-    { value: 'SEDENTARY', label: 'Минимальная', description: 'Офисная работа, почти без спорта', icon: Coffee },
-    { value: 'LIGHT', label: 'Лёгкая', description: 'Прогулки, уборка, легкая зарядка', icon: Zap },
-    { value: 'MODERATE', label: 'Средняя', description: 'Тренировки 3-5 раз в неделю', icon: Dumbbell },
-    { value: 'ACTIVE', label: 'Высокая', description: 'Интенсивный спорт 6-7 дней', icon: Flame },
-    { value: 'VERY_ACTIVE', label: 'Экстремальная', description: 'Проф. спорт или тяжелый труд', icon: Trophy }
-  ], []);
+    { value: 'SEDENTARY', label: t('profile.activity.sedentary', language), description: t('profile.activity.sedentary.desc', language), icon: Coffee },
+    { value: 'LIGHT', label: t('profile.activity.light', language), description: t('profile.activity.light.desc', language), icon: Zap },
+    { value: 'MODERATE', label: t('profile.activity.moderate', language), description: t('profile.activity.moderate.desc', language), icon: Dumbbell },
+    { value: 'ACTIVE', label: t('profile.activity.active', language), description: t('profile.activity.active.desc', language), icon: Flame },
+    { value: 'VERY_ACTIVE', label: t('profile.activity.veryActive', language), description: t('profile.activity.veryActive.desc', language), icon: Trophy }
+  ], [language]);
 
   const GOAL_OPTIONS = useMemo(() => [
-    { value: 'LOSS', label: 'Сбросить вес', description: 'Дефицит калорий для похудения', icon: TrendingDown },
-    { value: 'MAINTAIN', label: 'Поддерживать', description: 'Норма для сохранения веса', icon: Minus },
-    { value: 'GAIN', label: 'Набрать массу', description: 'Профицит для роста мышц', icon: TrendingUp }
-  ], []);
+    { value: 'LOSS', label: t('profile.goal.loss', language), description: t('profile.goal.loss.desc', language), icon: TrendingDown },
+    { value: 'MAINTAIN', label: t('profile.goal.maintain', language), description: t('profile.goal.maintain.desc', language), icon: Minus },
+    { value: 'GAIN', label: t('profile.goal.gain', language), description: t('profile.goal.gain.desc', language), icon: TrendingUp }
+  ], [language]);
 
   // Init form data from user
   useEffect(() => {
@@ -223,7 +224,7 @@ export default function Profile() {
     <div className="min-h-screen pb-36 px-5 pt-20">
 
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-tg-text">Профиль</h1>
+        <h1 className="text-2xl font-bold text-tg-text">{t('profile.title', language)}</h1>
         <div className="flex gap-2">
 
           <button
@@ -234,9 +235,9 @@ export default function Profile() {
             {isSaving ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : isEditing ? (
-              <> <Save className="w-4 h-4" /> Сохранить </>
+              <> <Save className="w-4 h-4" /> {t('profile.save', language)} </>
             ) : (
-              <> <Edit2 className="w-4 h-4" /> Изменить </>
+              <> <Edit2 className="w-4 h-4" /> {t('profile.edit', language)} </>
             )}
           </button>
         </div>
@@ -293,15 +294,15 @@ export default function Profile() {
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-tg-hint font-medium uppercase tracking-wider">Дневная цель</span>
-            {isEditing && <span className="text-[10px] text-brand-500 font-bold bg-brand-500/10 px-2 py-0.5 rounded-md">АВТО</span>}
+            <span className="text-sm text-tg-hint font-medium uppercase tracking-wider">{t('profile.dailyGoal', language)}</span>
+            {isEditing && <span className="text-[10px] text-brand-500 font-bold bg-brand-500/10 px-2 py-0.5 rounded-md">{t('profile.auto', language)}</span>}
           </div>
           <div className="flex items-baseline gap-1 mt-1">
             <span className="text-5xl font-black text-brand-500 tracking-tighter">{Math.round(user.dailyCalorieGoal)}</span>
-            <span className="text-lg font-medium text-tg-hint">ккал</span>
+            <span className="text-lg font-medium text-tg-hint">{t('common.kcal', language)}</span>
           </div>
           {isEditing && (
-            <p className="text-xs text-tg-hint/60 mt-2">Будет обновлено автоматически при сохранении</p>
+            <p className="text-xs text-tg-hint/60 mt-2">{t('profile.autoHint', language)}</p>
           )}
         </div>
       </div>
@@ -340,9 +341,9 @@ export default function Profile() {
                   <Crown className="w-5 h-5 text-[#FFD700] fill-current" />
                 </div>
                 <div>
-                  <p className="text-[#FFD700] text-xs font-bold tracking-wider uppercase mb-0.5">Premium Активен</p>
+                  <p className="text-[#FFD700] text-xs font-bold tracking-wider uppercase mb-0.5">{t('profile.subActive', language)}</p>
                   <p className="text-white/60 text-xs">
-                    До {new Date(user.subscriptionExpiresAt || Date.now()).toLocaleDateString()}
+                    {t('profile.expiresTo', language)} {new Date(user.subscriptionExpiresAt || Date.now()).toLocaleDateString()}
                   </p>
                 </div>
               </div>
@@ -355,9 +356,9 @@ export default function Profile() {
               <div className="text-[#FFD700]">
                 <div className="flex items-center gap-1.5 mb-1">
                   <div className="w-3 h-3 border-2 border-[#FFD700]/30 border-t-[#FFD700] rounded-full animate-spin" />
-                  <span className="font-bold tracking-wide text-xs uppercase opacity-80">Проверка</span>
+                  <span className="font-bold tracking-wide text-xs uppercase opacity-80">{t('profile.pending', language)}</span>
                 </div>
-                <p className="font-bold text-sm leading-tight text-white/90">Запрос обрабатывается</p>
+                <p className="font-bold text-sm leading-tight text-white/90">{t('profile.pendingText', language)}</p>
               </div>
               <div className="px-3 py-1 bg-[#FFD700]/10 border border-[#FFD700]/20 rounded-lg text-[#FFD700] text-xs font-bold">
                 WAIT
@@ -368,12 +369,12 @@ export default function Profile() {
               <div className="text-red-500">
                 <div className="flex items-center gap-1.5 mb-1">
                   <X className="w-4 h-4" />
-                  <span className="font-bold tracking-wide text-xs uppercase opacity-80">Отклонено</span>
+                  <span className="font-bold tracking-wide text-xs uppercase opacity-80">{t('profile.rejected', language)}</span>
                 </div>
-                <p className="font-bold text-sm leading-tight text-white/90">Попробуйте снова</p>
+                <p className="font-bold text-sm leading-tight text-white/90">{t('profile.tryAgain', language)}</p>
               </div>
               <button className="bg-red-500/10 text-red-500 px-3 py-1.5 rounded-lg text-xs font-bold border border-red-500/20">
-                Исправить
+                {t('profile.fix', language)}
               </button>
             </div>
           ) : (
@@ -384,7 +385,7 @@ export default function Profile() {
                   <Crown className="w-4 h-4 fill-current" />
                   <span className="font-black tracking-wide text-xs uppercase opacity-80">Calorie AI Pro</span>
                 </div>
-                <p className="font-bold text-lg leading-tight">Подключить<br />Premium</p>
+                <p className="font-bold text-lg leading-tight">{t('profile.connectPremium', language)}<br />Premium</p>
               </div>
               <button className="bg-white/90 text-[#5C4D00] px-4 py-2 rounded-xl text-xs font-black shadow-lg">
                 30 TJS / 3М
@@ -405,11 +406,11 @@ export default function Profile() {
       )}
 
       {/* Body Stats Form */}
-      <h3 className="text-sm font-semibold text-tg-hint uppercase tracking-wide ml-2 mb-3">Параметры тела</h3>
+      <h3 className="text-sm font-semibold text-tg-hint uppercase tracking-wide ml-2 mb-3">{t('profile.paramsTitle', language)}</h3>
       <div className="space-y-3 mb-8">
         <StatItem
           icon={Weight}
-          label="Вес"
+          label={t('profile.weight', language)}
           value={`${formData.weight} кг`}
           isEditing={isEditing}
           isActive={activeField === 'weight'}
@@ -422,7 +423,7 @@ export default function Profile() {
         />
         <StatItem
           icon={Ruler}
-          label="Рост"
+          label={t('profile.height', language)}
           value={`${formData.height} см`}
           isEditing={isEditing}
           isActive={activeField === 'height'}
@@ -435,7 +436,7 @@ export default function Profile() {
         />
         <StatItem
           icon={Calendar}
-          label="Возраст"
+          label={t('profile.age', language)}
           value={`${formData.age} лет`}
           isEditing={isEditing}
           isActive={activeField === 'age'}
@@ -448,7 +449,7 @@ export default function Profile() {
         />
         <StatItem
           icon={Activity}
-          label="Активность"
+          label={t('profile.activity', language)}
           value={ACTIVITY_LABELS[formData.activity] || formData.activity}
           isEditing={isEditing}
           isActive={activeField === 'activity'}
@@ -487,7 +488,7 @@ export default function Profile() {
         />
         <StatItem
           icon={Activity}
-          label="Цель"
+          label={t('profile.goal', language)}
           value={GOAL_LABELS[formData.target] || formData.target}
           isEditing={isEditing}
           isActive={activeField === 'target'}
@@ -526,8 +527,8 @@ export default function Profile() {
         />
         <StatItem
           icon={Globe}
-          label="Язык"
-          value={formData.language === 'ru' ? 'Русский' : formData.language === 'tj' ? 'Таджикский' : 'Узбекский'}
+          label={t('profile.language', language)}
+          value={formData.language === 'ru' ? 'Русский' : formData.language === 'tj' ? 'Тоҷикӣ' : 'Oʻzbekcha'}
           isEditing={isEditing}
           isActive={activeField === 'language'}
           onToggle={() => setActiveField(activeField === 'language' ? null : 'language')}
@@ -535,8 +536,8 @@ export default function Profile() {
             <div className="flex flex-col gap-2">
               {[
                 { value: 'ru', label: '🇷🇺 Русский' },
-                { value: 'tj', label: '🇹🇯 Таджикский' },
-                { value: 'uz', label: '🇺🇿 Узбекский' }
+                { value: 'tj', label: '🇹🇯 Тоҷикӣ' },
+                { value: 'uz', label: '🇺🇿 Oʻzbekcha' }
               ].map((opt) => {
                 const isSelected = formData.language === opt.value;
                 return (
@@ -562,8 +563,8 @@ export default function Profile() {
         />
         <StatItem
           icon={Activity}
-          label="Пол"
-          value={formData.gender === 'MALE' ? 'Муж.' : 'Жен.'}
+          label={t('profile.gender', language)}
+          value={formData.gender === 'MALE' ? t('profile.male', language) : t('profile.female', language)}
           isEditing={isEditing}
           isActive={activeField === 'gender'}
           onToggle={() => setActiveField(activeField === 'gender' ? null : 'gender')}
@@ -585,7 +586,7 @@ export default function Profile() {
                   className={`flex-1 py-2.5 relative z-10 text-sm font-bold transition-colors duration-300 ${formData.gender === g ? 'text-white' : 'text-gray-400 dark:text-gray-500'
                     }`}
                 >
-                  {g === 'MALE' ? 'Мужчина' : 'Женщина'}
+                  {g === 'MALE' ? t('profile.male', language) : t('profile.female', language)}
                 </button>
               ))}
             </div>

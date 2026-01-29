@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, memo } from 'react';
 import { useStore } from '../store/useStore';
+import { t, localeForLanguage } from '../utils/i18n';
 import { ChevronLeft, ChevronRight, Flame, Utensils } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MealCard from './MealCard';
@@ -59,6 +60,7 @@ export default function Calendar() {
   const [cursor, setCursor] = useState<Date>(new Date());
 
   const user = useStore(state => state.user);
+  const language = useStore(state => state.language);
   const meals = useStore(state => state.meals);
   const totals = useStore(state => state.totals);
   const selectedDate = useStore(state => state.selectedDate);
@@ -108,8 +110,8 @@ export default function Calendar() {
     });
   };
 
-  const monthLabel = cursor.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
-  const selectedDateLabel = selectedDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+  const monthLabel = cursor.toLocaleDateString(localeForLanguage(language), { month: 'long', year: 'numeric' });
+  const selectedDateLabel = selectedDate.toLocaleDateString(localeForLanguage(language), { day: 'numeric', month: 'long' });
   const isSelectedToday = isSameDate(selectedDate, today);
   const isLoadingHistory = mealsQuery.isLoading || mealsQuery.isFetching;
 
@@ -117,7 +119,7 @@ export default function Calendar() {
     <div className="min-h-screen pb-32 px-5 pt-10">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <p className="text-xs font-bold text-tg-hint uppercase tracking-widest mb-1">История</p>
+          <p className="text-xs font-bold text-tg-hint uppercase tracking-widest mb-1">{t('calendar.historyTitle', language)}</p>
           <h1 className="text-2xl font-bold text-tg-text capitalize">{monthLabel}</h1>
         </div>
         <div className="flex bg-white/50 dark:bg-white/5 rounded-full p-1 shadow-soft">
@@ -138,7 +140,15 @@ export default function Calendar() {
 
       {/* Weekdays Header */}
       <div className="grid grid-cols-7 gap-1 text-center mb-2">
-        {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(d => (
+        {[
+          t('calendar.weekday.mon', language),
+          t('calendar.weekday.tue', language),
+          t('calendar.weekday.wed', language),
+          t('calendar.weekday.thu', language),
+          t('calendar.weekday.fri', language),
+          t('calendar.weekday.sat', language),
+          t('calendar.weekday.sun', language)
+        ].map(d => (
           <div key={d} className="text-[10px] font-bold text-tg-hint/50 uppercase tracking-wider py-2">
             {d}
           </div>
@@ -162,7 +172,7 @@ export default function Calendar() {
       {/* SELECTED DATE SUMMARY */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-tg-text capitalize">{isSelectedToday ? 'Сегодня' : selectedDateLabel}</h2>
+          <h2 className="text-xl font-bold text-tg-text capitalize">{isSelectedToday ? t('common.today', language) : selectedDateLabel}</h2>
           {isLoadingHistory && <div className="animate-spin w-5 h-5 border-2 border-brand-500 border-t-transparent rounded-full" />}
         </div>
 
@@ -175,7 +185,7 @@ export default function Calendar() {
               </div>
               <div>
                 <div className="text-2xl font-black text-tg-text leading-none">{Math.round(totals.calories)}</div>
-                <div className="text-xs font-medium text-tg-hint mt-1">из {user ? user.dailyCalorieGoal : 2000} ккал</div>
+                <div className="text-xs font-medium text-tg-hint mt-1">{t('common.kcalOf', language)} {user ? user.dailyCalorieGoal : 2000}</div>
               </div>
             </div>
           </div>
@@ -183,7 +193,7 @@ export default function Calendar() {
           <div className="grid grid-cols-3 gap-4">
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-xs font-medium text-tg-hint">
-                <span>Белки</span>
+                <span>{t('common.protein', language)}</span>
                 <span className="text-blue-500">{Math.round(totals.protein)}г</span>
               </div>
               <div className="h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
@@ -196,7 +206,7 @@ export default function Calendar() {
             </div>
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-xs font-medium text-tg-hint">
-                <span>Жиры</span>
+                <span>{t('common.fat', language)}</span>
                 <span className="text-yellow-500">{Math.round(totals.fat)}г</span>
               </div>
               <div className="h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
@@ -209,7 +219,7 @@ export default function Calendar() {
             </div>
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-xs font-medium text-tg-hint">
-                <span>Углев</span>
+                <span>{t('common.carbs', language)}</span>
                 <span className="text-emerald-500">{Math.round(totals.carbs)}г</span>
               </div>
               <div className="h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
@@ -235,8 +245,8 @@ export default function Calendar() {
                   <Utensils className="w-8 h-8 text-tg-hint/30" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-tg-text">Пусто</h3>
-                  <p className="text-xs text-tg-hint max-w-[160px] mx-auto mt-1">В этот день вы не добавляли приемов пищи</p>
+                  <h3 className="text-sm font-bold text-tg-text">{t('calendar.emptyTitle', language)}</h3>
+                  <p className="text-xs text-tg-hint max-w-[160px] mx-auto mt-1">{t('calendar.emptyText', language)}</p>
                 </div>
               </motion.div>
             ) : (
@@ -259,8 +269,8 @@ export default function Calendar() {
         isOpen={!!mealToDelete}
         onClose={() => setMealToDelete(null)}
         onConfirm={handleDelete}
-        title="Удалить запись?"
-        message={`Вы уверены, что хотите удалить "${mealToDelete?.name}"? Это действие нельзя отменить.`}
+        title={t('common.deleteTitle', language)}
+        message={t('common.deleteMessage', language).replace('{name}', mealToDelete?.name || '')}
       />
     </div>
   );

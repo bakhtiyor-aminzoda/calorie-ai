@@ -11,7 +11,7 @@ import { useStore } from './store/useStore';
 import { authenticate, getTodayMeals, getProfile } from './api';
 
 function AppContent() {
-  const { user, setUser, setMeals } = useStore();
+  const { user, setUser, setMeals, setLanguage } = useStore();
   const [initData, setInitData] = useState<string>('');
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
@@ -72,6 +72,9 @@ function AppContent() {
         const authenticatedUser = await authenticate(raw);
         console.log('[App.init] Authenticated user:', authenticatedUser);
         setUser(authenticatedUser);
+        if (authenticatedUser.language) {
+          setLanguage(authenticatedUser.language);
+        }
 
         // Pre-determine if onboarding is needed, but don't show yet
         if (!authenticatedUser.age || !authenticatedUser.heightCm || !authenticatedUser.weightKg) {
@@ -105,6 +108,9 @@ function AppContent() {
         const updatedUser = await getProfile(user.id);
         console.log(`[App] Fetched profile for user ${user.id}:`, updatedUser);
         setUser(updatedUser);
+        if (updatedUser.language) {
+          setLanguage(updatedUser.language);
+        }
         setIsOnboarding(false);
         const { meals, totals } = await getTodayMeals(user.id);
         setMeals(meals, totals);

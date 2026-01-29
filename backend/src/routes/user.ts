@@ -149,6 +149,7 @@ router.patch('/:userId', async (req, res) => {
     console.log(`[PATCH /user/${req.params.userId}] Updated user:`, {
       id: user.id,
       firstName: user.firstName,
+      language: user.language,
       age: user.age,
       gender: user.gender,
       heightCm: user.heightCm,
@@ -164,6 +165,7 @@ router.patch('/:userId', async (req, res) => {
         firstName: user.firstName,
         username: user.username,
         dailyCalorieGoal: user.dailyCalorieGoal,
+        language: user.language,
         age: user.age,
         gender: user.gender,
         heightCm: user.heightCm,

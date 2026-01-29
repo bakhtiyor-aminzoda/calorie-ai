@@ -13,6 +13,15 @@ router.post('/', async (req, res) => {
     const telegramUser = validateTelegramData(initData);
     if (!telegramUser) return res.status(401).json({ error: 'Invalid Telegram data' });
 
+    const rawLanguage = telegramUser.language_code?.toLowerCase?.() || '';
+    const detectedLanguage = rawLanguage === 'ru'
+      ? 'ru'
+      : rawLanguage === 'uz'
+        ? 'uz'
+        : rawLanguage === 'tg'
+          ? 'tj'
+          : 'ru';
+
     let user = await prisma.user.findUnique({ where: { telegramId: BigInt(telegramUser.id) } });
 
     if (!user) {
@@ -21,7 +30,8 @@ router.post('/', async (req, res) => {
           telegramId: BigInt(telegramUser.id),
           firstName: telegramUser.first_name,
           lastName: telegramUser.last_name,
-          username: telegramUser.username
+          username: telegramUser.username,
+          language: detectedLanguage
         }
       });
     } else {
@@ -42,6 +52,7 @@ router.post('/', async (req, res) => {
         lastName: user.lastName,
         username: user.username,
         dailyCalorieGoal: user.dailyCalorieGoal,
+        language: user.language,
         age: user.age,
         gender: user.gender,
         heightCm: user.heightCm,
