@@ -290,8 +290,8 @@ export const translations = {
     'onboarding.perDay': 'калория / рӯз',
     'onboarding.calculating': 'Ҳисоб мекунем...',
     // Subscription
-    'subscription.price': '30 TJS / 3 мас',
-    'subscription.pricePerMonth': '10 TJS / мас',
+    'subscription.price': '30 TJS / 3 моҳ',
+    'subscription.pricePerMonth': '10 TJS / моҳ',
     // Main Screen
     'main.overviewTitle': 'Нигоҳи калория',
     'main.remaining': 'Боқӣ',
