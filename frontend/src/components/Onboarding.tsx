@@ -260,10 +260,6 @@ export default function Onboarding({ onComplete }: Props) {
               <motion.div key="language" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit"
                 style={{ willChange: 'transform, opacity' }}
                 className="absolute inset-0 flex flex-col gap-5 overflow-y-auto no-scrollbar pb-4">
-                <div className="text-center mb-4">
-                  <h2 className="text-2xl font-black text-gray-900 dark:text-white">{t('onboarding.selectLanguageTitle', language as Language)}</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('onboarding.selectLanguageHint', language as Language)}</p>
-                </div>
                 <div className="space-y-3 mt-4">
                   {[
                     { code: 'ru', name: t('language.ru.flag', language as Language), flag: '🇷🇺' },
