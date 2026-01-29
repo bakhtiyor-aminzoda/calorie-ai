@@ -216,9 +216,9 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
           {/* Macros Grid */}
           <div className="relative z-10 grid grid-cols-3 gap-2 mt-6">
               {[
-                { label: t('common.protein', language), val: totals.protein, color: 'bg-white/10 dark:bg-white/5' },
-                { label: t('common.fat', language), val: totals.fat, color: 'bg-white/10 dark:bg-white/5' },
-                { label: t('common.carbs', language), val: totals.carbs, color: 'bg-white/10 dark:bg-white/5' },
+                { label: t('common.proteinShort', language), val: totals.protein, color: 'bg-white/10 dark:bg-white/5' },
+                { label: t('common.fatShort', language), val: totals.fat, color: 'bg-white/10 dark:bg-white/5' },
+                { label: t('common.carbsShort', language), val: totals.carbs, color: 'bg-white/10 dark:bg-white/5' },
               ].map((m, i) => (
               <div key={i} className={`rounded-xl ${m.color} p-2 text-center`}>
                 <div className="text-lg font-bold">{m.val}{t('common.unit.gram', language)}</div>

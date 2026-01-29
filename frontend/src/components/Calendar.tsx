@@ -193,7 +193,7 @@ export default function Calendar() {
           <div className="grid grid-cols-3 gap-4">
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-xs font-medium text-tg-hint">
-                <span>{t('common.protein', language)}</span>
+                <span>{t('common.proteinShort', language)}</span>
                 <span className="text-blue-500">{Math.round(totals.protein)}{t('common.unit.gram', language)}</span>
               </div>
               <div className="h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
@@ -206,7 +206,7 @@ export default function Calendar() {
             </div>
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-xs font-medium text-tg-hint">
-                <span>{t('common.fat', language)}</span>
+                <span>{t('common.fatShort', language)}</span>
                 <span className="text-yellow-500">{Math.round(totals.fat)}{t('common.unit.gram', language)}</span>
               </div>
               <div className="h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
@@ -219,7 +219,7 @@ export default function Calendar() {
             </div>
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-xs font-medium text-tg-hint">
-                <span>{t('common.carbs', language)}</span>
+                <span>{t('common.carbsShort', language)}</span>
                 <span className="text-emerald-500">{Math.round(totals.carbs)}{t('common.unit.gram', language)}</span>
               </div>
               <div className="h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">

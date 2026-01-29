@@ -71,15 +71,15 @@ const MealCard = memo(({ meal, onDelete }: { meal: Meal; onDelete: (meal: Meal) 
           {/* Bottom: Macros (Full Width) */}
           <div className="grid grid-cols-3 gap-2 w-full">
             <div className="bg-blue-500/5 dark:bg-blue-500/10 rounded-lg px-2 py-1.5 flex flex-col items-center justify-center gap-0.5">
-              <span className="text-[10px] uppercase font-bold text-blue-500/60 leading-none tracking-wider">{t('common.protein', language)}</span>
+              <span className="text-[10px] uppercase font-bold text-blue-500/60 leading-none tracking-wider">{t('common.proteinShort', language)}</span>
               <span className="text-xs font-black text-blue-500 leading-none">{Math.round(meal.protein)}</span>
             </div>
             <div className="bg-yellow-500/5 dark:bg-yellow-500/10 rounded-lg px-2 py-1.5 flex flex-col items-center justify-center gap-0.5">
-              <span className="text-[10px] uppercase font-bold text-yellow-500/60 leading-none tracking-wider">{t('common.fat', language)}</span>
+              <span className="text-[10px] uppercase font-bold text-yellow-500/60 leading-none tracking-wider">{t('common.fatShort', language)}</span>
               <span className="text-xs font-black text-yellow-500 leading-none">{Math.round(meal.fat)}</span>
             </div>
             <div className="bg-emerald-500/5 dark:bg-emerald-500/10 rounded-lg px-2 py-1.5 flex flex-col items-center justify-center gap-0.5">
-              <span className="text-[10px] uppercase font-bold text-emerald-500/60 leading-none tracking-wider">{t('common.carbs', language)}</span>
+              <span className="text-[10px] uppercase font-bold text-emerald-500/60 leading-none tracking-wider">{t('common.carbsShort', language)}</span>
               <span className="text-xs font-black text-emerald-500 leading-none">{Math.round(meal.carbs)}</span>
             </div>
           </div>
