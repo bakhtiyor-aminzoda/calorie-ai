@@ -72,6 +72,11 @@ export const updateProfile = async (
   return response.data;
 };
 
+export const resetUserData = async (userId: string) => {
+  const response = await api.delete<{ success: boolean; message: string }>(`/user/${userId}/reset`);
+  return response.data;
+};
+
 export const buySubscription = async (userId: string) => {
   const response = await api.post<{ success: boolean; isPremium: boolean; subscriptionExpiresAt: string }>('/subscriptions/buy', { userId });
   return response.data;

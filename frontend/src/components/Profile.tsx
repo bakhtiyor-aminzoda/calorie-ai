@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, memo, useCallback } from 'react';
 import { useStore } from '../store/useStore';
-import { updateCalorieGoal, updateProfile, checkSubscriptionStatus } from '../api';
+import { updateCalorieGoal, updateProfile, checkSubscriptionStatus, resetUserData } from '../api';
 import { t } from '../utils/i18n';
 import WheelPicker from './WheelPicker';
 import { ChevronRight, Globe, Moon, Shield, Zap, Ruler, Weight, Calendar, Activity, Check, X, Calculator, Edit2, Save, Coffee, Dumbbell, Flame, Trophy, TrendingDown, Minus, TrendingUp, Crown } from 'lucide-react';
@@ -109,7 +109,7 @@ export default function Profile() {
       if (user.language && user.language !== language) {
         setLanguage(user.language as 'ru' | 'tj' | 'uz');
       }
-      
+
       setFormData({
         weight: user.weightKg || 70,
         height: user.heightCm || 175,
@@ -594,28 +594,27 @@ export default function Profile() {
         />
       </div >
 
-      <div className="mt-8 flex justify-center opacity-30 hover:opacity-100 transition-opacity">
-        <button
-          onClick={async () => {
-            if (confirm(t('profile.resetConfirm', language))) {
-              // Reset all fields that trigger onboarding check in App.tsx
-              await updateProfile(user.id, {
-                age: null,
-                heightCm: null,
-                weightKg: null,
-                activity: null,
-                goal: null
-              } as any); // cast to any if strict null checks complain, but interface allows null
-
-              await updateCalorieGoal(user.id, 2000);
-              window.location.reload();
-            }
-          }}
-          className="text-xs text-red-500 font-medium border border-red-500/30 px-3 py-1 rounded-lg"
-        >
-          {t('profile.resetButton', language)}
-        </button>
-      </div>
+      {/* Admin-only reset button */}
+      {user?.telegramId === '7851085399' && (
+        <div className="mt-8 flex justify-center opacity-30 hover:opacity-100 transition-opacity">
+          <button
+            onClick={async () => {
+              if (confirm(t('profile.resetConfirm', language))) {
+                try {
+                  await resetUserData(user.id);
+                  window.location.reload();
+                } catch (error) {
+                  console.error('Failed to reset user data:', error);
+                  alert('Ошибка при сбросе данных');
+                }
+              }
+            }}
+            className="text-xs text-red-500 font-medium border border-red-500/30 px-3 py-1 rounded-lg"
+          >
+            {t('profile.resetButton', language)}
+          </button>
+        </div>
+      )}
 
       <p className="text-center text-xs text-tg-hint/40 mt-4 pb-10">CalorieAI v1.1.2</p>
     </div>

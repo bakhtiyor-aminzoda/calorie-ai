@@ -180,4 +180,54 @@ router.patch('/:userId', async (req, res) => {
   }
 });
 
+// DELETE endpoint to completely reset user data (admin only)
+router.delete('/:userId/reset', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const adminTelegramId = process.env.ADMIN_TELEGRAM_ID;
+
+    // Get the user to check if they're admin
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if the user is admin
+    if (!adminTelegramId || user.telegramId.toString() !== adminTelegramId) {
+      return res.status(403).json({ error: 'Forbidden: Admin only' });
+    }
+
+    console.log(`[DELETE /user/${userId}/reset] Admin user resetting their data`);
+
+    // Delete all related data using cascade (meals and payment requests will be auto-deleted)
+    // But we'll do it explicitly for clarity
+    await prisma.meal.deleteMany({ where: { userId } });
+    await prisma.paymentRequest.deleteMany({ where: { userId } });
+
+    // Reset user profile to defaults
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        dailyCalorieGoal: 2000,
+        age: null,
+        gender: null,
+        heightCm: null,
+        weightKg: null,
+        activity: null,
+        goal: null,
+        isPremium: false,
+        subscriptionExpiresAt: null,
+        dailyRequestCount: 0,
+        lastRequestDate: new Date()
+      }
+    });
+
+    console.log(`[DELETE /user/${userId}/reset] Successfully reset admin user data`);
+    res.json({ success: true, message: 'User data reset successfully' });
+  } catch (error) {
+    console.error(`[DELETE /user/reset] Error:`, error);
+    res.status(500).json({ error: 'Internal error' });
+  }
+});
+
 export default router;
