@@ -1,5 +1,8 @@
 export const translations = {
   ru: {
+    // Language Selection
+    'onboarding.selectLanguageTitle': 'Выберите язык',
+    'onboarding.selectLanguageHint': 'Вы можете изменить язык позже в профиле',
     // Onboarding
     'onboarding.selectLanguage': 'Выберите язык',
     'onboarding.step1.title': 'О вас',
@@ -35,6 +38,9 @@ export const translations = {
     'subscription.pricePerMonth': '10 TJS / мес',
   },
   tj: {
+    // Language Selection
+    'onboarding.selectLanguageTitle': 'Забони худро интихоб кунед',
+    'onboarding.selectLanguageHint': 'Шумо метавонед забониро дар профилатон дертар тағйир диҳед',
     // Onboarding
     'onboarding.selectLanguage': 'Забони худро интихоб кунед',
     'onboarding.step1.title': 'Дар бораи шумо',
@@ -70,6 +76,9 @@ export const translations = {
     'subscription.pricePerMonth': '10 TJS / мас',
   },
   uz: {
+    // Language Selection
+    'onboarding.selectLanguageTitle': 'Tilni tanlang',
+    'onboarding.selectLanguageHint': 'Siz profilingizda tilni keyinroq oʻzgartirishingiz mumkin',
     // Onboarding
     'onboarding.selectLanguage': 'Tilni tanlang',
     'onboarding.step1.title': 'Siz haqingizda',
