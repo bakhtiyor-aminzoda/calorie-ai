@@ -105,7 +105,7 @@ export default function Calendar() {
     setIsDeleting(true);
     deleteMutation.mutate(mealToDelete, {
       onSuccess: () => setMealToDelete(null),
-      onError: () => alert('Ошибка при удалении'),
+      onError: () => alert(t('common.deleteError', language)),
       onSettled: () => setIsDeleting(false)
     });
   };
@@ -194,7 +194,7 @@ export default function Calendar() {
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-xs font-medium text-tg-hint">
                 <span>{t('common.protein', language)}</span>
-                <span className="text-blue-500">{Math.round(totals.protein)}г</span>
+                <span className="text-blue-500">{Math.round(totals.protein)}{t('common.unit.gram', language)}</span>
               </div>
               <div className="h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
                 <motion.div
@@ -207,7 +207,7 @@ export default function Calendar() {
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-xs font-medium text-tg-hint">
                 <span>{t('common.fat', language)}</span>
-                <span className="text-yellow-500">{Math.round(totals.fat)}г</span>
+                <span className="text-yellow-500">{Math.round(totals.fat)}{t('common.unit.gram', language)}</span>
               </div>
               <div className="h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
                 <motion.div
@@ -220,7 +220,7 @@ export default function Calendar() {
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-xs font-medium text-tg-hint">
                 <span>{t('common.carbs', language)}</span>
-                <span className="text-emerald-500">{Math.round(totals.carbs)}г</span>
+                <span className="text-emerald-500">{Math.round(totals.carbs)}{t('common.unit.gram', language)}</span>
               </div>
               <div className="h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
                 <motion.div
@@ -271,6 +271,8 @@ export default function Calendar() {
         onConfirm={handleDelete}
         title={t('common.deleteTitle', language)}
         message={t('common.deleteMessage', language).replace('{name}', mealToDelete?.name || '')}
+        confirmLabel={t('common.delete', language)}
+        cancelLabel={t('common.cancel', language)}
       />
     </div>
   );

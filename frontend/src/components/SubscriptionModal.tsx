@@ -111,7 +111,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                 });
             }
         } catch (error: any) {
-            alert(error.response?.data?.error || 'Ошибка при отправке запроса');
+            alert(error.response?.data?.error || t('subscription.requestError', language || 'ru'));
         } finally {
             setLoading(false);
         }
@@ -166,8 +166,8 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                                 <Upload className="w-5 h-5 text-yellow-500" />
                                             </div>
                                             <div>
-                                                <h4 className="text-yellow-500 text-sm font-bold">Запрос на проверке</h4>
-                                                <p className="text-white/60 text-xs">Мы проверяем ваш чек. Обычно это занимает 15 минут.</p>
+                                                <h4 className="text-yellow-500 text-sm font-bold">{t('subscription.pendingTitle', language || 'ru')}</h4>
+                                                <p className="text-white/60 text-xs">{t('subscription.pendingText', language || 'ru')}</p>
                                             </div>
                                         </div>
                                     )}
@@ -178,20 +178,20 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                                 <X className="w-5 h-5 text-red-500" />
                                             </div>
                                             <div>
-                                                <h4 className="text-red-500 text-sm font-bold">Оплата отклонена</h4>
-                                                <p className="text-white/60 text-xs">Проверьте Telegram. Попробуйте отправить чек еще раз.</p>
+                                                <h4 className="text-red-500 text-sm font-bold">{t('subscription.rejectedTitle', language || 'ru')}</h4>
+                                                <p className="text-white/60 text-xs">{t('subscription.rejectedText', language || 'ru')}</p>
                                             </div>
                                         </div>
                                     )}
 
-                                    <FeatureRow icon={Zap} text="Безлимитный AI Сканер еды" delay={0.1} />
-                                    <FeatureRow icon={Star} text="Детальный разбор нутриентов (БЖУ)" delay={0.2} />
-                                    <FeatureRow icon={Shield} text="Персональные цели и графики" delay={0.3} />
+                                    <FeatureRow icon={Zap} text={t('subscription.feature.scan', language || 'ru')} delay={0.1} />
+                                    <FeatureRow icon={Star} text={t('subscription.feature.macros', language || 'ru')} delay={0.2} />
+                                    <FeatureRow icon={Shield} text={t('subscription.feature.goals', language || 'ru')} delay={0.3} />
                                 </div>
 
                                 <div className="bg-white/5 border border-white/5 rounded-2xl p-5 mb-8">
                                     <div className="flex justify-between items-center mb-4">
-                                        <span className="text-white/60 font-bold uppercase text-[10px] tracking-widest">Тариф PRO</span>
+                                        <span className="text-white/60 font-bold uppercase text-[10px] tracking-widest">{t('subscription.proPlan', language || 'ru')}</span>
                                         <span className="text-white font-black">
                                             {t('subscription.price', language || 'ru')}
                                         </span>
@@ -200,7 +200,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                         onClick={() => setRequestStep('payment')}
                                         className="w-full py-4 bg-[#FFD700] text-[#5C4D00] font-black text-lg rounded-2xl shadow-glow active:scale-[0.98] transition-all"
                                     >
-                                        Подключить сейчас
+                                        {t('subscription.connectNow', language || 'ru')}
                                     </button>
                                 </div>
                             </motion.div>
@@ -209,13 +209,13 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                         {requestStep === 'payment' && (
                             <motion.div key="payment" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                                 <div className="bg-white/5 border border-[#FFD700]/20 rounded-[2rem] p-6 mb-6">
-                                    <h3 className="text-[#FFD700] font-bold text-sm uppercase tracking-wider mb-4">Инструкция по оплате</h3>
+                                    <h3 className="text-[#FFD700] font-bold text-sm uppercase tracking-wider mb-4">{t('subscription.paymentTitle', language || 'ru')}</h3>
                                     <div className="space-y-4 text-white/80 text-sm leading-relaxed mb-6">
                                         {language === 'uz' ? (
                                             <>
                                                 <div className="flex gap-3">
                                                     <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-500 flex items-center justify-center shrink-0 font-bold text-xs">1</div>
-                                                    <p>Quyidagi Visa kartalaridan biriga <b>38888 soʻm</b> oʻtkazing:</p>
+                                                    <p>{t('subscription.step1.uzs', language || 'ru').replace('{amount}', '38888 soʻm')}</p>
                                                 </div>
                                                 <div className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-2">
                                                     <div className="flex justify-between">
@@ -233,14 +233,14 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                                 </div>
                                                 <div className="flex gap-3">
                                                     <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-500 flex items-center justify-center shrink-0 font-bold text-xs">2</div>
-                                                    <p><b>Chekni skrinshot</b> qilib quyidaga joylang:</p>
+                                                    <p>{t('subscription.step2.uzs', language || 'ru')}</p>
                                                 </div>
                                             </>
                                         ) : (
                                             <>
                                                 <div className="flex gap-3">
                                                     <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-500 flex items-center justify-center shrink-0 font-bold text-xs">1</div>
-                                                    <p>Переведите <b>30 TJS</b> на одну из карт Visa:</p>
+                                                    <p>{t('subscription.step1.tjs', language || 'ru').replace('{amount}', '30 TJS')}</p>
                                                 </div>
                                                 <div className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-2">
                                                     <div className="flex justify-between">
@@ -258,7 +258,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                                 </div>
                                                 <div className="flex gap-3">
                                                     <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-500 flex items-center justify-center shrink-0 font-bold text-xs">2</div>
-                                                    <p>Сделайте <b>скриншот чека</b> и прикрепите его ниже:</p>
+                                                    <p>{t('subscription.step2.tjs', language || 'ru')}</p>
                                                 </div>
                                             </>
                                         )}
@@ -266,7 +266,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
 
                                     <div className="space-y-3">
                                         <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
-                                            <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold block mb-1">Ваш номер (для связи)</label>
+                                            <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold block mb-1">{t('subscription.phoneLabel', language || 'ru')}</label>
                                             <input
                                                 type="tel"
                                                 placeholder="+992 00 000 0000"
@@ -292,7 +292,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                                 <div className="p-3 bg-white/5 rounded-full group-active:scale-95 transition-transform">
                                                     <Upload className="w-6 h-6 text-white/40" />
                                                 </div>
-                                                <span className="text-white/40 text-xs font-bold uppercase tracking-widest">Прикрепить чек</span>
+                                                <span className="text-white/40 text-xs font-bold uppercase tracking-widest">{t('subscription.attachReceipt', language || 'ru')}</span>
                                             </button>
                                         ) : (
                                             <div className="relative w-full aspect-video bg-black/50 rounded-2xl overflow-hidden border border-white/10">
@@ -302,7 +302,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                                         onClick={() => fileInputRef.current?.click()}
                                                         className="px-4 py-2 bg-black/60 backdrop-blur-md rounded-xl text-white text-xs font-bold border border-white/10 active:scale-95 transition-all"
                                                     >
-                                                        Изменить фото
+                                                        {t('subscription.changePhoto', language || 'ru')}
                                                     </button>
                                                 </div>
                                             </div>
@@ -313,10 +313,10 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                             disabled={loading || !receiptFile || !phoneNumber}
                                             className="w-full py-4 bg-brand-500 text-white font-black rounded-2xl shadow-glow active:scale-[0.98] transition-all disabled:opacity-50 mt-2"
                                         >
-                                            {loading ? 'Отправка...' : 'Отправить на проверку'}
+                                            {loading ? t('subscription.sending', language || 'ru') : t('subscription.send', language || 'ru')}
                                         </button>
                                         <button onClick={() => setRequestStep('info')} className="w-full py-2 text-white/40 text-xs font-bold uppercase tracking-widest">
-                                            Назад
+                                            {t('common.back', language || 'ru')}
                                         </button>
                                     </div>
                                 </div>
@@ -328,22 +328,22 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                 <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mb-6">
                                     <Check className="w-10 h-10 text-emerald-500" />
                                 </div>
-                                <h3 className="text-2xl font-black text-white mb-2">Запрос отправлен!</h3>
+                                <h3 className="text-2xl font-black text-white mb-2">{t('subscription.successTitle', language || 'ru')}</h3>
                                 <p className="text-white/60 text-sm leading-relaxed mb-8 px-6">
-                                    Мы проверим вашу оплату в ближайшее время. Обычно это занимает от 5 до 30 минут. Premium активируется автоматически!
+                                    {t('subscription.successText', language || 'ru')}
                                 </p>
                                 <button
                                     onClick={onClose}
                                     className="w-full py-4 bg-white/10 text-white font-black rounded-2xl border border-white/10 active:scale-[0.98] transition-all"
                                 >
-                                    Понятно
+                                    {t('common.ok', language || 'ru')}
                                 </button>
                             </motion.div>
                         )}
                     </AnimatePresence>
 
                     <p className="text-center text-white/20 text-[10px] mt-6 px-10">
-                        Оплата производится напрямую без участия третьих лиц. Нажимая кнопку, вы соглашаетесь с условиями подписки.
+                        {t('subscription.disclaimer', language || 'ru')}
                     </p>
                 </div>
             </motion.div>

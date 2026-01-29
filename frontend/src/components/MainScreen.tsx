@@ -68,7 +68,7 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
     setIsDeleting(true);
     deleteMutation.mutate(mealToDelete, {
       onSuccess: () => setMealToDelete(null),
-      onError: () => alert('Ошибка при удалении'),
+      onError: () => alert(t('common.deleteError', language)),
       onSettled: () => setIsDeleting(false)
     });
   };
@@ -221,7 +221,7 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
                 { label: t('common.carbs', language), val: totals.carbs, color: 'bg-white/10 dark:bg-white/5' },
               ].map((m, i) => (
               <div key={i} className={`rounded-xl ${m.color} p-2 text-center`}>
-                <div className="text-lg font-bold">{m.val}г</div>
+                <div className="text-lg font-bold">{m.val}{t('common.unit.gram', language)}</div>
                 <div className="text-[10px] uppercase tracking-wider opacity-70">{m.label}</div>
               </div>
             ))}
@@ -280,6 +280,8 @@ export default function MainScreen({ onNavigate }: { onNavigate: (tab: any) => v
         onConfirm={handleDelete}
         title={t('common.deleteTitle', language)}
         message={t('common.deleteMessage', language).replace('{name}', mealToDelete?.name || '')}
+        confirmLabel={t('common.delete', language)}
+        cancelLabel={t('common.cancel', language)}
       />
     </div>
   );

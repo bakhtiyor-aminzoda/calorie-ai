@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Crown, Zap, Shield, Sparkles, TrendingUp } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { t, localeForLanguage } from '../utils/i18n';
 import { useEffect } from 'react';
 
 interface PremiumActiveModalProps {
@@ -9,6 +10,7 @@ interface PremiumActiveModalProps {
 
 export default function PremiumActiveModal({ onClose }: PremiumActiveModalProps) {
     const user = useStore(state => state.user);
+    const language = useStore(state => state.language);
     if (!user) return null;
 
     useEffect(() => {
@@ -20,15 +22,15 @@ export default function PremiumActiveModal({ onClose }: PremiumActiveModalProps)
     }, []);
 
     const features = [
-        { icon: Zap, label: 'Безлимитный AI анализ еды' },
-        { icon: TrendingUp, label: 'Подробная статистика и макросы' },
-        { icon: Shield, label: 'История питания без ограничений' },
-        { icon: Sparkles, label: 'Персональные рекомендации' }
+        { icon: Zap, label: t('premium.feature.ai', language) },
+        { icon: TrendingUp, label: t('premium.feature.stats', language) },
+        { icon: Shield, label: t('premium.feature.history', language) },
+        { icon: Sparkles, label: t('premium.feature.reco', language) }
     ];
 
     const expiresDate = user.subscriptionExpiresAt
-        ? new Date(user.subscriptionExpiresAt).toLocaleDateString('ru-RU')
-        : 'Навсегда';
+        ? new Date(user.subscriptionExpiresAt).toLocaleDateString(localeForLanguage(language))
+        : t('premium.forever', language);
 
     return (
         <motion.div
@@ -65,10 +67,10 @@ export default function PremiumActiveModal({ onClose }: PremiumActiveModalProps)
                                 <Crown className="w-10 h-10 text-[#1C1C1E] fill-current" />
                             </div>
                         </div>
-                        <h2 className="text-2xl font-black text-white mb-1 tracking-tight">Premium Активен</h2>
+                        <h2 className="text-2xl font-black text-white mb-1 tracking-tight">{t('premium.title', language)}</h2>
                         <div className="flex items-center gap-2 px-3 py-1 bg-[#FFD700]/10 border border-[#FFD700]/20 rounded-lg">
                             <div className="w-2 h-2 rounded-full bg-[#FFD700] animate-pulse" />
-                            <span className="text-[#FFD700] text-xs font-bold uppercase tracking-wider">Действует до {expiresDate}</span>
+                            <span className="text-[#FFD700] text-xs font-bold uppercase tracking-wider">{t('premium.expiresTo', language).replace('{date}', expiresDate)}</span>
                         </div>
                     </div>
 
@@ -91,13 +93,13 @@ export default function PremiumActiveModal({ onClose }: PremiumActiveModalProps)
                     {/* Footer */}
                     <div className="text-center space-y-3">
                         <p className="text-white/40 text-xs">
-                            Ваша подписка дает доступ ко всем <br /> возможностям CalorieAI
+                            {t('premium.footer', language)}
                         </p>
                         <button
                             onClick={onClose}
                             className="w-full py-3 bg-white text-black font-bold rounded-xl active:scale-95 transition-transform"
                         >
-                            Отлично
+                            {t('premium.ok', language)}
                         </button>
                     </div>
                 </div>

@@ -1,4 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { t, type Language } from '../utils/i18n';
+import { useStore } from '../store/useStore';
 
 interface Props {
     children: ReactNode;
@@ -28,7 +30,7 @@ export class ComponentErrorBoundary extends Component<Props, State> {
         if (this.state.hasError) {
             return this.props.fallback || (
                 <div className="p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">
-                    <h3 className="font-bold">Ошибка отображения</h3>
+                    <h3 className="font-bold">{t('errors.renderTitle', useStore.getState().language as Language)}</h3>
                     <pre className="text-xs mt-2 whitespace-pre-wrap">{this.state.error?.message}</pre>
                 </div>
             );

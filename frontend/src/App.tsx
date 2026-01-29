@@ -8,10 +8,11 @@ import Calendar from './components/Calendar';
 import Profile from './components/Profile';
 import AddMealModal from './components/AddMealModal';
 import { useStore } from './store/useStore';
+import { t } from './utils/i18n';
 import { authenticate, getTodayMeals, getProfile } from './api';
 
 function AppContent() {
-  const { user, setUser, setMeals, setLanguage } = useStore();
+  const { user, setUser, setMeals, setLanguage, language } = useStore();
   const [initData, setInitData] = useState<string>('');
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
@@ -34,8 +35,8 @@ function AppContent() {
       try {
         const raw = resolveInitData();
 
-        // Debug Bypass
-        if (window.location.search.includes('debug=onboarding')) {
+        // Debug Bypass (dev only)
+        if (import.meta.env.DEV && window.location.search.includes('debug=onboarding')) {
           console.log('Debug Onboarding Mode');
           setUser({ id: 999, firstName: 'Debug', username: 'debug', language_code: 'en' } as any);
           setIsOnboarding(true);
@@ -126,15 +127,17 @@ function AppContent() {
       <div className="flex items-center justify-center min-h-screen px-4 text-tg-text">
         <div className="text-center space-y-2">
           <div className="text-3xl">📱</div>
-          <p className="text-lg font-semibold">Открой мини‑апп внутри Telegram</p>
-          <p className="text-tg-hint text-sm">Используй кнопку в боте для запуска</p>
-          <div className="text-xs text-red-500 mt-4 max-w-[200px] overflow-hidden">
-            Debug: {typeof window !== 'undefined' ? JSON.stringify({
-              inTelegram: !!window.Telegram?.WebApp,
-              initDataLen: window.Telegram?.WebApp?.initData?.length,
-              search: window.location.search
-            }) : 'no-window'}
-          </div>
+          <p className="text-lg font-semibold">{t('common.openInTelegramTitle', language)}</p>
+          <p className="text-tg-hint text-sm">{t('common.openInTelegramHint', language)}</p>
+          {import.meta.env.DEV && (
+            <div className="text-xs text-red-500 mt-4 max-w-[200px] overflow-hidden">
+              Debug: {typeof window !== 'undefined' ? JSON.stringify({
+                inTelegram: !!window.Telegram?.WebApp,
+                initDataLen: window.Telegram?.WebApp?.initData?.length,
+                search: window.location.search
+              }) : 'no-window'}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -145,7 +148,7 @@ function AppContent() {
       <div className="flex items-center justify-center min-h-screen bg-[#F2F4F8] dark:bg-black">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto mb-4"></div>
-          <p className="text-tg-hint font-medium">Загрузка...</p>
+          <p className="text-tg-hint font-medium">{t('common.loading', language)}</p>
         </div>
       </div>
     );
@@ -160,7 +163,7 @@ function AppContent() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto mb-4"></div>
-          <p className="text-tg-hint">Авторизация...</p>
+          <p className="text-tg-hint">{t('common.authorizing', language)}</p>
         </div>
       </div>
     );

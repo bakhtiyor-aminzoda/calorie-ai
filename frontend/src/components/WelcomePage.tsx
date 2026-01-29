@@ -2,6 +2,8 @@ import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { useHapticFeedback } from '@telegram-apps/sdk-react';
 import { memo, useEffect } from 'react';
+import { useStore } from '../store/useStore';
+import { t } from '../utils/i18n';
 import logoAmini from '../images/logo-amini.jpeg';
 
 interface WelcomePageProps {
@@ -10,6 +12,7 @@ interface WelcomePageProps {
 
 const WelcomePage = ({ onStart }: WelcomePageProps) => {
     const haptic = useHapticFeedback();
+    const language = useStore(state => state.language);
 
     useEffect(() => {
         // Automatic transition after 4 seconds
@@ -62,7 +65,7 @@ const WelcomePage = ({ onStart }: WelcomePageProps) => {
                                 Calorie <span className="text-brand-500">AI</span>
                             </h1>
                             <p className="text-sm font-medium text-tg-hint max-w-[240px] leading-relaxed mx-auto">
-                                Твой персональный ассистент для контроля питания через камеру
+                                {t('welcome.subtitle', language)}
                             </p>
                         </motion.div>
                     </div>
@@ -75,7 +78,7 @@ const WelcomePage = ({ onStart }: WelcomePageProps) => {
                         className="flex flex-col items-center gap-4 bg-white/50 dark:bg-white/5 p-6 rounded-[2rem] border border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm"
                     >
                         <span className="text-[9px] font-bold text-tg-hint uppercase tracking-[0.2em] opacity-60">
-                            Разработка проекта
+                            {t('welcome.devLabel', language)}
                         </span>
                         <div className="flex items-center gap-3">
                             <img
@@ -104,8 +107,8 @@ const WelcomePage = ({ onStart }: WelcomePageProps) => {
                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                         className="w-4 h-4 border-2 border-brand-500/30 border-t-brand-500 rounded-full"
                     />
-                    <span className="text-[10px] font-bold text-tg-hint uppercase tracking-widest opacity-40">
-                        Загрузка системы
+                        <span className="text-[10px] font-bold text-tg-hint uppercase tracking-widest opacity-40">
+                        {t('welcome.loadingSystem', language)}
                     </span>
                 </div>
             </div>

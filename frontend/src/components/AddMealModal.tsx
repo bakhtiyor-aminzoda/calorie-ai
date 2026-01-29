@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, memo, useMemo } from 'react';
 import { useStore } from '../store/useStore';
+import { t } from '../utils/i18n';
 import { createMeal, analyzeImage } from '../api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Scan, X, Camera, Image as ImageIcon, Zap, Sparkles } from 'lucide-react';
@@ -8,7 +9,7 @@ import SubscriptionModal from './SubscriptionModal';
 import { useQueryClient } from '@tanstack/react-query';
 
 // Memoized Nutrient Card component for maximum performance
-const NutrientCard = memo(({ label, value, color, unit = 'г' }: { label: string, value: number, color: string, unit?: string }) => (
+const NutrientCard = memo(({ label, value, color, unit }: { label: string, value: number, color: string, unit: string }) => (
   <div className={`${color} p-3 rounded-2xl text-center shadow-sm border border-black/5 dark:border-white/5 w-full`}>
     <div className="text-[10px] opacity-60 font-bold mb-1 uppercase tracking-tight">{label}</div>
     <div className="text-base font-black tabular-nums">{value}{unit}</div>
@@ -17,6 +18,7 @@ const NutrientCard = memo(({ label, value, color, unit = 'г' }: { label: string
 
 const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
   const user = useStore(state => state.user);
+  const language = useStore(state => state.language);
   const addMeal = useStore(state => state.addMeal);
   const selectedDate = useStore(state => state.selectedDate);
   const queryClient = useQueryClient();
@@ -47,12 +49,14 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const scanSteps = [
-    "Инициализация нейросети...",
-    "Поиск объектов на фото...",
-    "Анализ объема и веса...",
-    "Вычисление нутриентов..."
-  ];
+  const scanSteps = useMemo(() => (
+    [
+      t('addMeal.scanStep.init', language),
+      t('addMeal.scanStep.detect', language),
+      t('addMeal.scanStep.volume', language),
+      t('addMeal.scanStep.nutrients', language)
+    ]
+  ), [language]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -88,7 +92,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
       streamRef.current = stream;
       setTimeout(() => { if (videoRef.current) videoRef.current.srcObject = stream; }, 100);
     } catch (err) {
-      setCameraError('Не удалось открыть камеру');
+      setCameraError(t('common.cameraError', language));
       setIsCameraOpen(false);
     }
   };
@@ -161,7 +165,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
         setShowSubscription(true);
         return;
       }
-      alert('Ошибка анализа');
+      alert(t('common.analysisError', language));
     } finally {
       setIsAnalyzing(false);
     }
@@ -215,7 +219,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
       if (window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
       onClose();
     } catch (e) {
-      alert('Ошибка сохранения');
+      alert(t('common.saveError', language));
     } finally {
       setIsSaving(false);
     }
@@ -239,14 +243,14 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
         style={{ willChange: 'transform' }}
         className="relative w-full sm:max-w-md bg-[#F2F4F8] dark:bg-[#1C1C1E] rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl"
       >
-        <ComponentErrorBoundary fallback={<div className="p-6 text-red-500">Ошибка модального окна.</div>}>
+        <ComponentErrorBoundary fallback={<div className="p-6 text-red-500">{t('addMeal.modalError', language)}</div>}>
           <div className="flex items-center justify-between p-6 pb-2">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-brand-500 rounded-lg shadow-sm">
                 <Scan className="w-5 h-5 text-white" />
               </div>
               <h2 className="text-xl font-bold text-tg-text">
-                {isCameraOpen ? 'Камера' : 'AI Сканер'}
+                {isCameraOpen ? t('addMeal.cameraTitle', language) : t('addMeal.title', language)}
               </h2>
             </div>
             <button onClick={onClose} disabled={isAnalyzing} className="p-2 bg-gray-200 dark:bg-gray-800 rounded-full text-tg-hint active:scale-95 transition-all">
@@ -284,7 +288,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
 
                   <div className="absolute bottom-6 inset-x-0 flex flex-col items-center gap-6 z-20">
                     <div className="bg-black/40 px-5 py-2 rounded-full border border-white/10 shadow-lg backdrop-blur-md">
-                      <p className="text-white/80 text-[10px] font-bold tracking-[0.2em] uppercase">AI Vision Active</p>
+                      <p className="text-white/80 text-[10px] font-bold tracking-[0.2em] uppercase">{t('addMeal.aiVision', language)}</p>
                     </div>
 
                     {/* Pro Shutter Control Layer */}
@@ -311,11 +315,11 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
                 <motion.div key="upload" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex flex-col gap-4">
                   <button onClick={startCamera} className="group relative h-48 rounded-[2rem] bg-gradient-to-br from-brand-500 to-brand-600 text-white flex flex-col items-center justify-center shadow-lg active:scale-[0.98] transition-all">
                     <div className="p-4 bg-white/20 rounded-2xl mb-3"><Camera className="w-8 h-8" /></div>
-                    <span className="font-bold text-lg">Открыть камеру</span>
+                    <span className="font-bold text-lg">{t('addMeal.openCamera', language)}</span>
                   </button>
                   <button onClick={() => fileInputRef.current?.click()} className="h-16 rounded-[2rem] bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 flex items-center justify-center gap-3 font-semibold active:opacity-60 transition-opacity">
                     <ImageIcon className="w-5 h-5 text-brand-500" />
-                    Галерея
+                    {t('addMeal.gallery', language)}
                   </button>
                 </motion.div>
               ) : !analysisResult ? (
@@ -337,7 +341,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
                     {!isAnalyzing && (
                       <div className="absolute bottom-6 inset-x-6 z-30 flex flex-col gap-3">
                         <button onClick={() => handleAnalyze()} className="w-full py-4 bg-brand-500 text-white font-bold rounded-2xl shadow-glow active:scale-95 transition-transform flex items-center justify-center gap-2">
-                          <Zap className="w-5 h-5 fill-current" /> Анализировать
+                          <Zap className="w-5 h-5 fill-current" /> {t('addMeal.analyze', language)}
                         </button>
                         <button
                           onClick={() => {
@@ -350,7 +354,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
                           }}
                           className="w-full py-3 bg-black/60 text-white font-medium rounded-2xl active:opacity-80 transition-all font-bold"
                         >
-                          {imageSource === 'gallery' ? 'Выбрать другую' : 'Переснять'}
+                          {imageSource === 'gallery' ? t('addMeal.chooseAnother', language) : t('addMeal.retake', language)}
                         </button>
                       </div>
                     )}
@@ -363,7 +367,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                     <div className="absolute bottom-4 left-5 right-5">
                       <div className={`px-2 py-0.5 rounded-md text-[10px] font-bold inline-block mb-1 border ${(analysisResult.confidence ?? 1) > 0.8 ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-100' : 'bg-yellow-500/20 border-yellow-500/30 text-yellow-100'}`}>
-                        AI CONFIDENCE {Math.round((analysisResult.confidence ?? 0.98) * 100)}%
+                        {t('addMeal.aiConfidence', language)} {Math.round((analysisResult.confidence ?? 0.98) * 100)}%
                       </div>
                       <h3 className="text-white text-xl font-bold line-clamp-1">
                           {analysisResult.name}
@@ -372,23 +376,23 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
                   </div>
 
                   <div className="grid grid-cols-4 gap-2.5">
-                    <NutrientCard label="Ккал" value={analysisResult.calories} color="bg-white dark:bg-white/5" unit="" />
-                    <NutrientCard label="Белки" value={analysisResult.protein} color="bg-blue-50/50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-300" />
-                    <NutrientCard label="Жиры" value={analysisResult.fat} color="bg-yellow-50/50 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-300" />
-                    <NutrientCard label="Угл" value={analysisResult.carbs} color="bg-emerald-50/50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-300" />
+                    <NutrientCard label={t('addMeal.caloriesShort', language)} value={analysisResult.calories} color="bg-white dark:bg-white/5" unit="" />
+                    <NutrientCard label={t('addMeal.proteinShort', language)} value={analysisResult.protein} color="bg-blue-50/50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-300" unit={t('common.unit.gram', language)} />
+                    <NutrientCard label={t('addMeal.fatShort', language)} value={analysisResult.fat} color="bg-yellow-50/50 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-300" unit={t('common.unit.gram', language)} />
+                    <NutrientCard label={t('addMeal.carbsShort', language)} value={analysisResult.carbs} color="bg-emerald-50/50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-300" unit={t('common.unit.gram', language)} />
                   </div>
 
                   <div className="bg-white dark:bg-white/5 rounded-3xl p-4 border border-black/5 dark:border-white/5 shadow-sm space-y-3">
                     {analysisResult.weightG && (
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-tg-hint">Вес блюда</span>
-                        <span className="text-base font-bold text-tg-text">{Math.round(analysisResult.weightG)} г</span>
+                        <span className="text-sm font-medium text-tg-hint">{t('addMeal.weightLabel', language)}</span>
+                        <span className="text-base font-bold text-tg-text">{Math.round(analysisResult.weightG)} {t('common.unit.gram', language)}</span>
                       </div>
                     )}
 
                     {analysisResult.ingredients && analysisResult.ingredients.length > 0 && (
                       <div className="space-y-2">
-                        <div className="text-sm font-semibold text-tg-text">Ингредиенты</div>
+                        <div className="text-sm font-semibold text-tg-text">{t('addMeal.ingredients', language)}</div>
                         <div className="flex flex-wrap gap-2">
                           {analysisResult.ingredients.map((ing: string, idx: number) => (
                             <span key={idx} className="px-3 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-sm text-tg-text font-medium border border-black/5 dark:border-white/10">
@@ -401,9 +405,9 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
                   </div>
 
                   <div className="flex gap-3 mt-1">
-                    <button onClick={() => setAnalysisResult(null)} className="flex-1 py-4 bg-gray-200 dark:bg-white/5 text-tg-text font-bold rounded-2xl active:scale-95 transition-all">Назад</button>
+                    <button onClick={() => setAnalysisResult(null)} className="flex-1 py-4 bg-gray-200 dark:bg-white/5 text-tg-text font-bold rounded-2xl active:scale-95 transition-all">{t('addMeal.back', language)}</button>
                     <button onClick={handleSaveMeal} disabled={isSaving} className="flex-[2] py-4 bg-brand-500 text-white font-bold rounded-2xl shadow-glow active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                      {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Zap className="w-5 h-5 fill-current" /> В дневник</>}
+                      {isSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Zap className="w-5 h-5 fill-current" /> {t('addMeal.toDiary', language)}</>}
                     </button>
                   </div>
                 </motion.div>

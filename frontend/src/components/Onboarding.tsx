@@ -201,10 +201,10 @@ export default function Onboarding({ onComplete }: Props) {
   };
 
   const activityCards = [
-    { id: 'SEDENTARY', title: 'Минимальная', desc: 'Сидячая работа', icon: Leaf },
-    { id: 'LIGHT', title: 'Лёгкая', desc: 'Прогулки, йога', icon: Activity },
-    { id: 'MODERATE', title: 'Средняя', desc: '3-4 тренировки', icon: Zap },
-    { id: 'ACTIVE', title: 'Высокая', desc: 'Спорт 5+ раз', icon: Target },
+    { id: 'SEDENTARY', title: t('onboarding.activity.minimal', language as Language), desc: t('onboarding.activity.minimal.desc', language as Language), icon: Leaf },
+    { id: 'LIGHT', title: t('onboarding.activity.light', language as Language), desc: t('onboarding.activity.light.desc', language as Language), icon: Activity },
+    { id: 'MODERATE', title: t('onboarding.activity.moderate', language as Language), desc: t('onboarding.activity.moderate.desc', language as Language), icon: Zap },
+    { id: 'ACTIVE', title: t('onboarding.activity.active', language as Language), desc: t('onboarding.activity.active.desc', language as Language), icon: Target },
   ] as const;
 
   return (
@@ -266,9 +266,9 @@ export default function Onboarding({ onComplete }: Props) {
                 </div>
                 <div className="space-y-3 mt-4">
                   {[
-                    { code: 'ru', name: '🇷🇺 Русский', flag: '🇷🇺' },
-                    { code: 'tj', name: '🇹🇯 Тоҷикӣ', flag: '🇹🇯' },
-                    { code: 'uz', name: '🇺🇿 Oʻzbekcha', flag: '🇺🇿' }
+                    { code: 'ru', name: t('language.ru.flag', language as Language), flag: '🇷🇺' },
+                    { code: 'tj', name: t('language.tj.flag', language as Language), flag: '🇹🇯' },
+                    { code: 'uz', name: t('language.uz.flag', language as Language), flag: '🇺🇿' }
                   ].map(lang => (
                     <button
                       key={lang.code}
@@ -416,7 +416,7 @@ export default function Onboarding({ onComplete }: Props) {
                     <button key={g} onClick={() => { haptic.selectionChanged(); setFormData({ ...formData, goal: g }) }}
                       className={cn("py-3 rounded-xl text-xs font-bold transition-all relative", formData.goal === g ? "text-white" : "text-gray-500 dark:text-gray-400")}>
                       {formData.goal === g && <motion.div layoutId="goal-active" className="absolute inset-0 bg-brand-500 rounded-xl shadow-sm" />}
-                      <span className="relative z-10">{g === 'LOSS' ? 'Сбросить' : g === 'GAIN' ? 'Набрать' : 'Держать'}</span>
+                      <span className="relative z-10">{g === 'LOSS' ? t('onboarding.goal.loss', language as Language) : g === 'GAIN' ? t('onboarding.goal.gain', language as Language) : t('onboarding.goal.maintain', language as Language)}</span>
                     </button>
                   ))}
                 </div>
@@ -426,11 +426,11 @@ export default function Onboarding({ onComplete }: Props) {
                   <div className="absolute inset-x-0 -bottom-10 h-32 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
 
                   <div className="relative z-10 flex flex-col items-center text-brand-50">
-                    <span className="text-xs font-bold uppercase tracking-widest opacity-80 mb-1">Ваша норма</span>
+                    <span className="text-xs font-bold uppercase tracking-widest opacity-80 mb-1">{t('onboarding.recommendedCalories', language as Language)}</span>
                     <div className="text-[4.5rem] leading-[1.1] font-black tracking-tighter drop-shadow-lg tabular-nums">
                       {recommended}
                     </div>
-                    <span className="text-sm font-semibold opacity-90 mt-2">ккал / день</span>
+                    <span className="text-sm font-semibold opacity-90 mt-2">{t('onboarding.perDay', language as Language)}</span>
                   </div>
                 </div>
               </motion.div>
@@ -454,7 +454,7 @@ export default function Onboarding({ onComplete }: Props) {
               {isSubmitting ? (
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Считаем...</span>
+                  <span>{t('onboarding.calculating', language as Language)}</span>
                 </div>
               ) : (
                 <>

@@ -1,5 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, X } from 'lucide-react';
+import { t, type Language } from '../utils/i18n';
+import { useStore } from '../store/useStore';
 
 interface ConfirmModalProps {
     isOpen: boolean;
@@ -18,10 +20,14 @@ export default function ConfirmModal({
     onConfirm,
     title,
     message,
-    confirmLabel = 'Удалить',
-    cancelLabel = 'Отмена',
+    confirmLabel,
+    cancelLabel,
     isDanger = true
 }: ConfirmModalProps) {
+    const { language } = useStore();
+    const resolvedConfirmLabel = confirmLabel ?? t('common.delete', language as Language);
+    const resolvedCancelLabel = cancelLabel ?? t('common.cancel', language as Language);
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -56,13 +62,13 @@ export default function ConfirmModal({
                                     }}
                                     className={`w-full py-4 rounded-2xl font-bold text-white shadow-lg active:scale-[0.98] transition-all ${isDanger ? 'bg-red-500 shadow-red-500/20' : 'bg-brand-500 shadow-brand-500/20'}`}
                                 >
-                                    {confirmLabel}
+                                    {resolvedConfirmLabel}
                                 </button>
                                 <button
                                     onClick={onClose}
                                     className="w-full py-4 rounded-2xl font-bold text-tg-hint hover:text-tg-text transition-colors bg-gray-50 dark:bg-white/5"
                                 >
-                                    {cancelLabel}
+                                    {resolvedCancelLabel}
                                 </button>
                             </div>
                         </div>

@@ -184,7 +184,7 @@ router.post('/approve', async (req, res) => {
         if (request.status !== 'PENDING') return res.status(400).json({ error: 'Request already processed' });
 
         const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 30);
+        expiresAt.setDate(expiresAt.getDate() + 90);
 
         await prisma.$transaction([
             prisma.paymentRequest.update({

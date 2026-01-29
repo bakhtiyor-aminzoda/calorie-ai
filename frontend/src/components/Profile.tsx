@@ -321,7 +321,7 @@ export default function Profile() {
               return;
             }
             if (subStatus === 'PENDING') {
-              alert('Ваш запрос уже обрабатывается!');
+              alert(t('common.pendingRequest', language));
               return;
             }
             setShowSubscription(true);
@@ -388,7 +388,7 @@ export default function Profile() {
                 <p className="font-bold text-lg leading-tight">{t('profile.connectPremium', language)}<br />Premium</p>
               </div>
               <button className="bg-white/90 text-[#5C4D00] px-4 py-2 rounded-xl text-xs font-black shadow-lg">
-                30 TJS / 3М
+                {t('subscription.price', language)}
               </button>
             </div>
           )}
@@ -411,7 +411,7 @@ export default function Profile() {
         <StatItem
           icon={Weight}
           label={t('profile.weight', language)}
-          value={`${formData.weight} кг`}
+          value={`${formData.weight} ${t('common.unit.kg', language)}`}
           isEditing={isEditing}
           isActive={activeField === 'weight'}
           onToggle={() => setActiveField(activeField === 'weight' ? null : 'weight')}
@@ -424,7 +424,7 @@ export default function Profile() {
         <StatItem
           icon={Ruler}
           label={t('profile.height', language)}
-          value={`${formData.height} см`}
+          value={`${formData.height} ${t('common.unit.cm', language)}`}
           isEditing={isEditing}
           isActive={activeField === 'height'}
           onToggle={() => setActiveField(activeField === 'height' ? null : 'height')}
@@ -437,7 +437,7 @@ export default function Profile() {
         <StatItem
           icon={Calendar}
           label={t('profile.age', language)}
-          value={`${formData.age} лет`}
+          value={`${formData.age} ${t('common.unit.years', language)}`}
           isEditing={isEditing}
           isActive={activeField === 'age'}
           onToggle={() => setActiveField(activeField === 'age' ? null : 'age')}
@@ -528,16 +528,16 @@ export default function Profile() {
         <StatItem
           icon={Globe}
           label={t('profile.language', language)}
-          value={formData.language === 'ru' ? 'Русский' : formData.language === 'tj' ? 'Тоҷикӣ' : 'Oʻzbekcha'}
+          value={formData.language === 'ru' ? t('language.ru', language) : formData.language === 'tj' ? t('language.tj', language) : t('language.uz', language)}
           isEditing={isEditing}
           isActive={activeField === 'language'}
           onToggle={() => setActiveField(activeField === 'language' ? null : 'language')}
           editingContent={
             <div className="flex flex-col gap-2">
               {[
-                { value: 'ru', label: '🇷🇺 Русский' },
-                { value: 'tj', label: '🇹🇯 Тоҷикӣ' },
-                { value: 'uz', label: '🇺🇿 Oʻzbekcha' }
+                { value: 'ru', label: t('language.ru.flag', language) },
+                { value: 'tj', label: t('language.tj.flag', language) },
+                { value: 'uz', label: t('language.uz.flag', language) }
               ].map((opt) => {
                 const isSelected = formData.language === opt.value;
                 return (
@@ -597,7 +597,7 @@ export default function Profile() {
       <div className="mt-8 flex justify-center opacity-30 hover:opacity-100 transition-opacity">
         <button
           onClick={async () => {
-            if (confirm('Сбросить прогресс и пройти онбординг заново?')) {
+            if (confirm(t('profile.resetConfirm', language))) {
               // Reset all fields that trigger onboarding check in App.tsx
               await updateProfile(user.id, {
                 age: null,
@@ -613,7 +613,7 @@ export default function Profile() {
           }}
           className="text-xs text-red-500 font-medium border border-red-500/30 px-3 py-1 rounded-lg"
         >
-          [DEV] Сбросить профиль
+          {t('profile.resetButton', language)}
         </button>
       </div>
 

@@ -1,4 +1,6 @@
 import { useMemo, memo } from 'react';
+import { useStore } from '../store/useStore';
+import { t, localeForLanguage } from '../utils/i18n';
 import { Utensils } from 'lucide-react';
 
 interface Meal {
@@ -13,9 +15,10 @@ interface Meal {
 }
 
 const MealCard = memo(({ meal, onDelete }: { meal: Meal; onDelete: (meal: Meal) => void }) => {
+  const language = useStore(state => state.language);
   const time = useMemo(() => 
-    new Date(meal.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }), 
-    [meal.createdAt]
+    new Date(meal.createdAt).toLocaleTimeString(localeForLanguage(language), { hour: '2-digit', minute: '2-digit' }),
+    [meal.createdAt, language]
   );
 
   return (
@@ -59,7 +62,7 @@ const MealCard = memo(({ meal, onDelete }: { meal: Meal; onDelete: (meal: Meal) 
           <div className="flex items-center gap-2 mb-2">
             <div className="flex items-baseline gap-1">
               <span className="text-xl font-black text-brand-500 leading-none">{Math.round(meal.calories)}</span>
-              <span className="text-xs font-medium text-tg-hint">ккал</span>
+              <span className="text-xs font-medium text-tg-hint">{t('common.kcal', language)}</span>
             </div>
             <span className="text-[10px] text-tg-hint/40">•</span>
             <span className="text-xs text-tg-hint/60 font-medium">{time}</span>
@@ -68,15 +71,15 @@ const MealCard = memo(({ meal, onDelete }: { meal: Meal; onDelete: (meal: Meal) 
           {/* Bottom: Macros (Full Width) */}
           <div className="grid grid-cols-3 gap-2 w-full">
             <div className="bg-blue-500/5 dark:bg-blue-500/10 rounded-lg px-2 py-1.5 flex flex-col items-center justify-center gap-0.5">
-              <span className="text-[10px] uppercase font-bold text-blue-500/60 leading-none tracking-wider">Белки</span>
+              <span className="text-[10px] uppercase font-bold text-blue-500/60 leading-none tracking-wider">{t('common.protein', language)}</span>
               <span className="text-xs font-black text-blue-500 leading-none">{Math.round(meal.protein)}</span>
             </div>
             <div className="bg-yellow-500/5 dark:bg-yellow-500/10 rounded-lg px-2 py-1.5 flex flex-col items-center justify-center gap-0.5">
-              <span className="text-[10px] uppercase font-bold text-yellow-500/60 leading-none tracking-wider">Жиры</span>
+              <span className="text-[10px] uppercase font-bold text-yellow-500/60 leading-none tracking-wider">{t('common.fat', language)}</span>
               <span className="text-xs font-black text-yellow-500 leading-none">{Math.round(meal.fat)}</span>
             </div>
             <div className="bg-emerald-500/5 dark:bg-emerald-500/10 rounded-lg px-2 py-1.5 flex flex-col items-center justify-center gap-0.5">
-              <span className="text-[10px] uppercase font-bold text-emerald-500/60 leading-none tracking-wider">Угли</span>
+              <span className="text-[10px] uppercase font-bold text-emerald-500/60 leading-none tracking-wider">{t('common.carbs', language)}</span>
               <span className="text-xs font-black text-emerald-500 leading-none">{Math.round(meal.carbs)}</span>
             </div>
           </div>

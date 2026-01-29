@@ -1,3 +1,6 @@
+import { useStore } from '../store/useStore';
+import { t } from '../utils/i18n';
+
 interface Props {
   current: number;
   goal: number;
@@ -5,6 +8,7 @@ interface Props {
 }
 
 export default function ProgressCircle({ current, goal, progress }: Props) {
+  const language = useStore(state => state.language);
   const radius = 88;
   const circumference = 2 * Math.PI * radius;
   const pct = Math.min(progress, 120);
@@ -28,16 +32,16 @@ export default function ProgressCircle({ current, goal, progress }: Props) {
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
           <div className="text-[40px] leading-none font-extrabold text-tg-text tracking-tight">{current}</div>
-          <div className="text-xs text-tg-hint">ккал из {goal}</div>
+          <div className="text-xs text-tg-hint">{t('common.kcalOf', language)} {goal}</div>
           <div className={`text-xs mt-1 ${overLimit ? 'text-red-400' : 'text-brand-500'}`}>{Math.round(progress)}%</div>
         </div>
       </div>
       <div className="mt-4 text-center">
         <div className="text-sm font-medium text-tg-hint">
           {goal - current > 0 ? (
-            <span>Осталось <span className="text-tg-text font-semibold">{goal - current}</span> ккал</span>
+            <span>{t('main.remaining', language)} <span className="text-tg-text font-semibold">{goal - current}</span> {t('common.kcal', language)}</span>
           ) : (
-            <span>Превышение на <span className="text-red-500 font-semibold">{current - goal}</span> ккал</span>
+            <span>{t('main.over', language)} <span className="text-red-500 font-semibold">{current - goal}</span> {t('common.kcal', language)}</span>
           )}
         </div>
       </div>

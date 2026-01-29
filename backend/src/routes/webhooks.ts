@@ -69,7 +69,7 @@ router.post('/telegram', async (req, res) => {
             }
 
             const expiresAt = new Date();
-            expiresAt.setDate(expiresAt.getDate() + 30);
+            expiresAt.setDate(expiresAt.getDate() + 90);
 
             console.log(`✓ Updating DB - Premium expires: ${expiresAt}`);
             
@@ -92,7 +92,7 @@ router.post('/telegram', async (req, res) => {
                 console.log(`✓ Notifying user ${user.telegramId} of approval...`);
                 await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     chat_id: user.telegramId.toString(),
-                    text: `🌟 *Поздравляем! Ваш Premium активирован!* 🌟\n\nТеперь у вас есть безлимитный доступ ко всем функциям на 30 дней. Приятного аппетита!`,
+                    text: `🌟 *Поздравляем! Ваш Premium активирован!* 🌟\n\nТеперь у вас есть безлимитный доступ ко всем функциям на 90 дней. Приятного аппетита!`,
                     parse_mode: 'Markdown'
                 }).catch(err => console.error('❌ Failed to notify user of approval:', err.message));
             }
