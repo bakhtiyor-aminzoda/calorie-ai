@@ -30,6 +30,20 @@ router.post('/', upload.single('photo'), async (req, res) => {
     let analysis;
     // Check if analysis data is provided in body (from frontend pre-analysis)
     if (req.body.name && req.body.calories) {
+      let ingredients: string[] = [];
+      if (req.body.ingredients) {
+        try {
+          const parsed = JSON.parse(req.body.ingredients);
+          ingredients = Array.isArray(parsed)
+            ? parsed.map((item: any) => String(item)).filter(Boolean)
+            : parsed
+              ? [String(parsed)]
+              : [];
+        } catch {
+          ingredients = [String(req.body.ingredients)];
+        }
+      }
+
       analysis = {
         name: req.body.name,
         calories: Number(req.body.calories),
@@ -38,7 +52,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
         carbs: Number(req.body.carbs),
         weightG: req.body.weightG ? Math.round(Number(req.body.weightG)) : null,
         confidence: req.body.confidence ? Number(req.body.confidence) : null,
-        ingredients: req.body.ingredients ? JSON.parse(req.body.ingredients) : []
+        ingredients
       };
     } else {
       // Fallback to backend analysis if not provided

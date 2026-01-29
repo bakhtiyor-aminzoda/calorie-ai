@@ -37,13 +37,20 @@ export async function analyzeFoodImage(imageUrl: string): Promise<FoodAnalysis> 
     const jsonString = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const result: FoodAnalysis = JSON.parse(jsonString);
 
+    const rawIngredients = (result as any).ingredients;
+    const ingredients = Array.isArray(rawIngredients)
+      ? rawIngredients.map((item) => String(item)).filter(Boolean)
+      : rawIngredients
+        ? [String(rawIngredients)]
+        : [];
+
     return {
       name: result.name,
       calories: Math.round(result.calories),
       protein: Math.round(result.protein * 10) / 10,
       fat: Math.round(result.fat * 10) / 10,
       carbs: Math.round(result.carbs * 10) / 10,
-      ingredients: result.ingredients || [],
+      ingredients,
       weightG: result.weightG || 0,
       confidence: result.confidence || 0
     };
