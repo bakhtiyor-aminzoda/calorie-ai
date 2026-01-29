@@ -323,11 +323,23 @@ export const translations = {
 
 export function t(key: string, language: Language = 'ru'): string {
   const keys = key.split('.');
-  let value: any = translations[language];
+  let value: any = translations[language] ?? translations.ru;
   for (const k of keys) {
     value = value?.[k];
   }
-  return String(value) || key;
+
+  if (value === undefined || value === null) {
+    if (language !== 'ru') {
+      let fallback: any = translations.ru;
+      for (const k of keys) {
+        fallback = fallback?.[k];
+      }
+      if (fallback !== undefined && fallback !== null) return String(fallback);
+    }
+    return key;
+  }
+
+  return String(value);
 }
 
 export function localeForLanguage(language: Language = 'ru'): string {
