@@ -227,8 +227,8 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
 
   // Determine modal height based on state
   const getModalHeight = () => {
-    if (isCameraOpen) return "h-[90svh] sm:h-[85vh] max-h-[90svh]";
-    if (!preview && !analysisResult) return "h-[40svh] sm:h-[32vh] max-h-[40svh]"; // compact for source picker
+    if (isCameraOpen) return "h-[85svh] sm:h-[80vh] max-h-[85svh]";
+    if (!preview && !analysisResult) return "h-[55svh] sm:h-[50vh] max-h-[60svh]"; // compact for source picker (increased to fit both buttons)
     return "h-[90svh] sm:h-[85vh] max-h-[90svh]"; // expanded for preview/analysis
   };
 
@@ -377,7 +377,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
                         {t('addMeal.aiConfidence', language)} {Math.round((analysisResult.confidence ?? 0.98) * 100)}%
                       </div>
                       <h3 className="text-white text-xl font-bold line-clamp-1">
-                          {analysisResult.name}
+                        {analysisResult.name}
                       </h3>
                     </div>
                   </div>
