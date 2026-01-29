@@ -241,7 +241,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
         initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: "spring", damping: 30, stiffness: 300, mass: 0.8 }}
         style={{ willChange: 'transform' }}
-        className="relative w-full sm:max-w-md bg-[#F2F4F8] dark:bg-[#1C1C1E] rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl"
+        className="relative w-full sm:max-w-md bg-[#F2F4F8] dark:bg-[#1C1C1E] rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl h-[90svh] sm:h-[85vh] max-h-[90svh] flex flex-col"
       >
         <ComponentErrorBoundary fallback={<div className="p-6 text-red-500">{t('addMeal.modalError', language)}</div>}>
           <div className="flex items-center justify-between p-6 pb-2">
@@ -258,7 +258,7 @@ const AddMealModal = memo(({ onClose }: { onClose: () => void }) => {
             </button>
           </div>
 
-          <div ref={contentRef} className="p-6 pt-4 max-h-[calc(100vh-300px)] overflow-y-auto">
+          <div ref={contentRef} className="p-6 pt-4 flex-1 overflow-y-auto">
             <AnimatePresence mode="wait" initial={false}>
               {isCameraOpen ? (
                 <motion.div key="camera" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative rounded-3xl overflow-hidden aspect-[9/16] bg-black shadow-inner">
