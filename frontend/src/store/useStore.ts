@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { type User, type Meal, type Totals } from '../api';
+import { type Language } from '../utils/i18n';
 
 
 
@@ -8,11 +9,11 @@ interface AppState {
   meals: Meal[];
   totals: Totals;
   selectedDate: Date;
-  language: 'ru' | 'tj' | 'uz'; // Language setting
+  language: Language;
   setUser: (user: User) => void;
   setMeals: (meals: Meal[], totals: Totals) => void;
   setSelectedDate: (date: Date) => void;
-  setLanguage: (lang: 'ru' | 'tj' | 'uz') => void;
+  setLanguage: (lang: Language) => void;
   addMeal: (meal: Meal) => void;
   removeMeal: (mealId: string) => void;
 }
@@ -22,7 +23,7 @@ export const useStore = create<AppState>((set) => ({
   meals: [],
   totals: { calories: 0, protein: 0, fat: 0, carbs: 0 },
   selectedDate: new Date(),
-  language: 'ru',
+  language: 'ru' as Language,
   setUser: (user) => set({ user }),
   setMeals: (meals, totals) => set({ meals, totals }),
   setSelectedDate: (date) => set({ selectedDate: date }),

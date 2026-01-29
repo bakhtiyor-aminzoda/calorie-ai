@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { updateProfile, updateCalorieGoal } from '../api';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { cn } from '../utils/cn';
-import { t } from '../utils/i18n';
+import { t, type Language } from '../utils/i18n';
 import {
   type Gender,
   type ActivityLevel,
@@ -243,11 +243,11 @@ export default function Onboarding({ onComplete }: Props) {
               transition={{ duration: 0.2 }}
               className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400"
             >
-              {step === -1 ? t('onboarding.selectLanguage', language as any) : step === 0 ? t('onboarding.step1.title', language as any) : step === 1 ? t('onboarding.step2.title', language as any) : t('onboarding.step3.title', language as any)}
+              {step === -1 ? t('onboarding.selectLanguage', language as Language) : step === 0 ? t('onboarding.step1.title', language as Language) : step === 1 ? t('onboarding.step2.title', language as Language) : t('onboarding.step3.title', language as Language)}
             </motion.h1>
           </AnimatePresence>
           <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-            {step === -1 ? t('onboarding.selectLanguageHint', language as any) : `${t('onboarding.step' + (step + 1) + '.subtitle', language as any)}`}
+            {step === -1 ? t('onboarding.selectLanguageHint', language as Language) : `${t('onboarding.step' + (step + 1) + '.subtitle', language as Language)}`}
           </p>
         </div>
 
@@ -261,8 +261,8 @@ export default function Onboarding({ onComplete }: Props) {
                 style={{ willChange: 'transform, opacity' }}
                 className="absolute inset-0 flex flex-col gap-5 overflow-y-auto no-scrollbar pb-4">
                 <div className="text-center mb-4">
-                  <h2 className="text-2xl font-black text-gray-900 dark:text-white">{t('onboarding.selectLanguageTitle', language as any)}</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('onboarding.selectLanguageHint', language as any)}</p>
+                  <h2 className="text-2xl font-black text-gray-900 dark:text-white">{t('onboarding.selectLanguageTitle', language as Language)}</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('onboarding.selectLanguageHint', language as Language)}</p>
                 </div>
                 <div className="space-y-3 mt-4">
                   {[
@@ -299,8 +299,8 @@ export default function Onboarding({ onComplete }: Props) {
                 <div className="px-1">
                   <ModernInput
                     icon={Users}
-                    label={t('onboarding.yourName', language as any)}
-                    placeholder={t('onboarding.name', language as any)}
+                    label={t('onboarding.yourName', language as Language)}
+                    placeholder={t('onboarding.name', language as Language)}
                     value={formData.firstName}
                     onChange={(v: string) => handleInput('firstName', v)}
                     type="text"
@@ -317,7 +317,7 @@ export default function Onboarding({ onComplete }: Props) {
                       )}
                       <span className={cn("relative z-10 flex items-center justify-center gap-2", formData.gender === g ? "text-white" : "text-gray-500")}>
                         {g === 'MALE' ? <Users className="w-4 h-4" /> : <Users className="w-4 h-4" />}
-                        {g === 'MALE' ? t('onboarding.male', language as any) : t('onboarding.female', language as any)}
+                        {g === 'MALE' ? t('onboarding.male', language as Language) : t('onboarding.female', language as Language)}
                       </span>
                     </button>
                   ))}
@@ -328,7 +328,7 @@ export default function Onboarding({ onComplete }: Props) {
                   <div className="flex-1 min-w-0">
                     <WheelPicker
                       height={220}
-                      label={t('onboarding.age', language as any)}
+                      label={t('onboarding.age', language as Language)}
                       items={ageRange}
                       value={parseInt(formData.age || '25')}
                       onChange={(v: number) => handleInput('age', v.toString())}
@@ -338,7 +338,7 @@ export default function Onboarding({ onComplete }: Props) {
                   <div className="flex-1 min-w-0">
                     <WheelPicker
                       height={220}
-                      label={t('onboarding.height', language as any)}
+                      label={t('onboarding.height', language as Language)}
                       items={heightRange}
                       value={parseInt(formData.height || '175')}
                       onChange={(v: number) => handleInput('height', v.toString())}
@@ -348,7 +348,7 @@ export default function Onboarding({ onComplete }: Props) {
                   <div className="flex-1 min-w-0">
                     <WheelPicker
                       height={220}
-                      label={t('onboarding.weight', language as any)}
+                      label={t('onboarding.weight', language as Language)}
                       items={weightRange}
                       value={parseInt(formData.weight || '70')}
                       onChange={(v: number) => handleInput('weight', v.toString())}
@@ -363,8 +363,8 @@ export default function Onboarding({ onComplete }: Props) {
                         <Activity className="w-5 h-5" />
                       </div>
                       <div>
-                        <div className="text-xs font-semibold text-brand-800 dark:text-brand-200">{t('onboarding.bmi', language as any)}</div>
-                        <div className="text-[10px] text-brand-600 dark:text-brand-400">{t('onboarding.bmiNorm', language as any)}</div>
+                        <div className="text-xs font-semibold text-brand-800 dark:text-brand-200">{t('onboarding.bmi', language as Language)}</div>
+                        <div className="text-[10px] text-brand-600 dark:text-brand-400">{t('onboarding.bmiNorm', language as Language)}</div>
                       </div>
                     </div>
                     <span className="text-xl font-bold text-brand-700 dark:text-brand-200">{bmi}</span>
@@ -444,7 +444,7 @@ export default function Onboarding({ onComplete }: Props) {
           {step < stepsTotal - 1 ? (
             <button onClick={next} disabled={step === 0 && !isValidStep0}
               className="w-full py-5 rounded-[20px] bg-brand-600 text-white font-bold text-xl shadow-[0_10px_30px_-5px_rgba(85,126,255,0.4)] hover:shadow-[0_15px_35px_-5px_rgba(85,126,255,0.5)] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:shadow-none relative overflow-hidden">
-              <span className="relative z-10">{t('onboarding.next', language as any)}</span>
+              <span className="relative z-10">{t('onboarding.next', language as Language)}</span>
               <ArrowRight className="w-6 h-6 relative z-10 opacity-80" />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 translate-x-[-150%] animate-[shimmer_2s_infinite]" />
             </button>
@@ -458,7 +458,7 @@ export default function Onboarding({ onComplete }: Props) {
                 </div>
               ) : (
                 <>
-                  <span>{t('onboarding.start', language as any)}</span>
+                  <span>{t('onboarding.start', language as Language)}</span>
                   <div className="bg-white/20 rounded-full p-1">
                     <ArrowRight className="w-5 h-5" />
                   </div>

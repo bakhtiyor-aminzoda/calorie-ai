@@ -4,7 +4,7 @@ import { X, Check, Star, Zap, Shield, Crown, Image as ImageIcon, Upload } from '
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { requestSubscription, checkSubscriptionStatus } from '../api';
-import { t } from '../utils/i18n';
+import { t, type Language } from '../utils/i18n';
 import confetti from 'canvas-confetti';
 
 interface SubscriptionModalProps {
@@ -192,7 +192,12 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                 <div className="bg-white/5 border border-white/5 rounded-2xl p-5 mb-8">
                                     <div className="flex justify-between items-center mb-4">
                                         <span className="text-white/60 font-bold uppercase text-[10px] tracking-widest">Тариф PRO</span>
-                                        <span className="text-white font-black">{t('subscription.price', language as any)}</span>
+                                        <span className="text-white font-black">
+                                            {(() => {
+                                                const price = t('subscription.price', language as Language);
+                                                return price;
+                                            })()}
+                                        </span>
                                     </div>
                                     <button
                                         onClick={() => setRequestStep('payment')}

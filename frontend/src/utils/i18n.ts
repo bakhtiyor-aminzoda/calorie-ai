@@ -1,3 +1,5 @@
+export type Language = 'ru' | 'tj' | 'uz';
+
 export const translations = {
   ru: {
     // Language Selection
@@ -115,11 +117,11 @@ export const translations = {
   }
 } as const;
 
-export function t(key: string, language: 'ru' | 'tj' | 'uz' = 'ru'): string {
+export function t(key: string, language: Language = 'ru'): string {
   const keys = key.split('.');
   let value: any = translations[language];
   for (const k of keys) {
     value = value?.[k];
   }
-  return value || key;
+  return String(value) || key;
 }
