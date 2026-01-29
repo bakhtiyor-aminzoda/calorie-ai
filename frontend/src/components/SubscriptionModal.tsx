@@ -193,10 +193,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                     <div className="flex justify-between items-center mb-4">
                                         <span className="text-white/60 font-bold uppercase text-[10px] tracking-widest">Тариф PRO</span>
                                         <span className="text-white font-black">
-                                            {(() => {
-                                                const price = t('subscription.price', language as Language);
-                                                return price;
-                                            })()}
+                                            {t('subscription.price', language || 'ru')}
                                         </span>
                                     </div>
                                     <button

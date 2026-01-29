@@ -15,6 +15,7 @@ model User {
   username          String?
   phoneNumber       String?
   dailyCalorieGoal  Int      @default(2000)
+  language          String   @default("ru")
   // Profile & metabolism inputs
   age               Int?
   gender            Gender?

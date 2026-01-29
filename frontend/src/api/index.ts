@@ -13,6 +13,7 @@ export interface User {
   lastName: string | null;
   username: string | null;
   dailyCalorieGoal: number;
+  language?: string;
   age?: number | null;
   gender?: 'MALE' | 'FEMALE' | null;
   heightCm?: number | null;

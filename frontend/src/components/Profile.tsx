@@ -104,6 +104,11 @@ export default function Profile() {
   // Init form data from user
   useEffect(() => {
     if (user && !isEditing) {
+      // Sync language from user data if available
+      if (user.language && user.language !== language) {
+        setLanguage(user.language as 'ru' | 'tj' | 'uz');
+      }
+      
       setFormData({
         weight: user.weightKg || 70,
         height: user.heightCm || 175,
@@ -111,10 +116,10 @@ export default function Profile() {
         gender: user.gender || 'MALE',
         activity: user.activity || 'MODERATE',
         target: user.goal || 'MAINTAIN',
-        language: language
+        language: (user.language as 'ru' | 'tj' | 'uz') || language
       });
     }
-  }, [user, isEditing, language]);
+  }, [user, isEditing]);
 
   // Reset scroll position when component mounts
   useEffect(() => {
@@ -139,7 +144,8 @@ export default function Profile() {
         age: formData.age,
         gender: formData.gender as "MALE" | "FEMALE",
         activity: formData.activity as ActivityLevel,
-        goal: formData.target as GoalType
+        goal: formData.target as GoalType,
+        language: formData.language
       };
 
       await updateProfile(user.id, apiData);

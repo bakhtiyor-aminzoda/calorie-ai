@@ -32,6 +32,7 @@ router.get('/:userId', async (req, res) => {
         lastName: user.lastName,
         username: user.username,
         dailyCalorieGoal: user.dailyCalorieGoal,
+        language: user.language,
         age: user.age,
         gender: user.gender,
         heightCm: user.heightCm,
@@ -90,6 +91,7 @@ router.patch('/:userId', async (req, res) => {
     const {
       firstName,
       dailyCalorieGoal,
+      language,
       age,
       gender,
       heightCm,
@@ -111,6 +113,7 @@ router.patch('/:userId', async (req, res) => {
     // Build update object
     const data: any = {};
     if (firstName !== undefined) data.firstName = firstName;
+    if (language !== undefined) data.language = language;
     if (age !== undefined) data.age = parseInt(age);
     if (gender !== undefined) data.gender = gender as Gender;
     if (heightCm !== undefined) data.heightCm = parseInt(heightCm);
