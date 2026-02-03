@@ -219,16 +219,8 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                                 </div>
                                                 <div className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-2">
                                                     <div className="flex justify-between">
-                                                        <span className="opacity-60 text-xs">Visa (Alif Bank)</span>
-                                                        <span className="font-mono text-brand-400 font-bold select-all">4405 0000 1234 5678</span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="opacity-60 text-xs">Visa (Milliy Bank)</span>
-                                                        <span className="font-mono text-brand-400 font-bold select-all">4276 1500 2000 7890</span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="opacity-60 text-xs">Visa (Tojik Bank)</span>
-                                                        <span className="font-mono text-brand-400 font-bold select-all">4111 2222 3333 4444</span>
+                                                        <span className="opacity-60 text-xs">Visa DC</span>
+                                                        <span className="font-mono text-brand-400 font-bold select-all">9762 0000 0174 6154</span>
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-3">
