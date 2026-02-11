@@ -96,6 +96,11 @@ export const requestSubscription = async (userId: string, receipt: File, phoneNu
   return response.data;
 };
 
+export const verifyDCPayment = async (userId: string) => {
+  const response = await api.post<{ success: boolean; expiresAt?: string; message?: string }>('/subscriptions/verify-dc', { userId });
+  return response.data;
+};
+
 export const checkSubscriptionStatus = async (userId: string) => {
   const response = await api.get<{ isPremium: boolean; lastRequestStatus: string }>('/subscriptions/status/' + userId);
   return response.data;

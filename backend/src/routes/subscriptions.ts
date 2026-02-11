@@ -68,7 +68,7 @@ async function notifyAdmin(user: any, requestId: string, receiptPath: string) {
         });
 
         console.log('✅ Telegram notification sent successfully to admin');
-        
+
         // Delete receipt file after successful send
         fs.unlink(receiptPath, (err) => {
             if (err) {
@@ -227,6 +227,93 @@ router.post('/reject', async (req, res) => {
 
         res.json({ success: true });
     } catch (error) {
+        res.status(500).json({ error: 'Internal error' });
+    }
+});
+
+// 6. Verify DC Merchant Payment
+import { checkDCPayment } from '../services/dcMerchant';
+
+router.post('/verify-dc', async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ error: 'User ID required' });
+
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        // Comment code expected: "#<TELEGRAM_ID>" or just "<TELEGRAM_ID>"
+        // We will check for the telegram ID in the comment
+        const commentCode = user.telegramId.toString();
+        const amount = 30; // Hardcoded price for now
+
+        console.log(`[Verify DC] Checking for user ${userId} with code ${commentCode}`);
+
+        const verification = await checkDCPayment(commentCode, amount);
+
+        if (verification.success && verification.transaction) {
+            // Check if already processed (optional, but good practice to prevent double dipping if we stored transaction IDs)
+            // For now, we trust the "last 7 days" and "isPremium" check.
+            // But if user pays once, they could spam verify. 
+            // Better: Store the transaction ID in PaymentRequest to ensure uniqueness.
+
+            const existing = await prisma.paymentRequest.findFirst({
+                where: { transactionId: verification.transaction.docnum } // Using docnum as unique ID
+            });
+
+            if (existing) {
+                return res.json({ success: false, message: 'Этот платеж уже был использован.' });
+            }
+
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 90);
+
+            // Create approved payment record
+            await prisma.paymentRequest.create({
+                data: {
+                    userId,
+                    amount: 30,
+                    status: 'APPROVED',
+                    currency: 'TJS',
+                    transactionId: verification.transaction.docnum,
+                    receiptUrl: 'dc_merchant_auto', // No file
+                }
+            });
+
+            // Activate Premium
+            await prisma.user.update({
+                where: { id: userId },
+                data: { isPremium: true, subscriptionExpiresAt: expiresAt }
+            });
+
+            console.log(`[Verify DC] Success for user ${userId}`);
+
+            // Notify Admin
+            if (BOT_TOKEN) {
+                const userLine = user.username ? `@${user.username}` : user.firstName || 'User';
+                const phoneLine = user.phoneNumber ? `📱 Телефон: \`${user.phoneNumber}\`\n` : '';
+                const profileLink = `tg://user?id=${user.telegramId}`;
+
+                await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    chat_id: ADMIN_TG_ID,
+                    text: `✅ *Новая оплата через DC Wallet!*\n\n` +
+                        `👤 Клиент: [${userLine}](${profileLink})\n` +
+                        `${phoneLine}` +
+                        `🆔 ID: \`${user.telegramId}\`\n` +
+                        `💰 Сумма: *30 TJS*\n` +
+                        `📄 Док: \`${verification.transaction.docnum}\`\n\n` +
+                        `✨ Премиум активирован автоматически на 3 месяца.`,
+                    parse_mode: 'Markdown'
+                }).catch(() => { });
+            }
+
+            return res.json({ success: true, expiresAt });
+        } else {
+            return res.json({ success: false, message: 'Оплата не найдена. Проверьте комментарий или попробуйте позже.' });
+        }
+
+    } catch (error) {
+        console.error('[Verify DC] Error:', error);
         res.status(500).json({ error: 'Internal error' });
     }
 });

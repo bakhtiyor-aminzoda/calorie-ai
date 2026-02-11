@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Star, Zap, Shield, Crown, Image as ImageIcon, Upload } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { requestSubscription, checkSubscriptionStatus } from '../api';
+import { requestSubscription, checkSubscriptionStatus, verifyDCPayment } from '../api';
 import { t, type Language } from '../utils/i18n';
 import confetti from 'canvas-confetti';
 
@@ -18,7 +18,8 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
     const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
     const [phoneNumber, setPhoneNumber] = useState('');
     const [status, setStatus] = useState<string>('NONE'); // NONE, PENDING, REJECTED, APPROVED
-    const [requestStep, setRequestStep] = useState<'info' | 'payment' | 'success'>('info');
+    const [requestStep, setRequestStep] = useState<'method' | 'info' | 'payment' | 'dc' | 'success'>('method');
+    const [verifyingDC, setVerifyingDC] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const [mounted, setMounted] = useState(false);
@@ -100,7 +101,6 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
         setLoading(true);
         try {
             const result = await requestSubscription(user.id, receiptFile, phoneNumber);
-
             if (result.success) {
                 setRequestStep('success');
                 confetti({
@@ -114,6 +114,29 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
             alert(error.response?.data?.error || t('subscription.requestError', language || 'ru'));
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDCVerify = async () => {
+        if (!user) return;
+        setVerifyingDC(true);
+        try {
+            const result = await verifyDCPayment(user.id);
+            if (result.success) {
+                setRequestStep('success');
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#FFD700', '#007AFF', '#ffffff'] // Gold, Blue (DC), White
+                });
+            } else {
+                alert(result.message || 'Оплата не найдена');
+            }
+        } catch (error) {
+            alert('Ошибка при проверке оплаты');
+        } finally {
+            setVerifyingDC(false);
         }
     };
 
@@ -157,6 +180,117 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                     </div>
 
                     <AnimatePresence mode="wait">
+                        {requestStep === 'method' && (
+                            <motion.div key="method" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                <div className="space-y-4 mb-8">
+                                    <div className="text-center mb-6">
+                                        <p className="text-white/60 text-sm">Выберите удобный способ оплаты</p>
+                                    </div>
+
+                                    {/* DC Wallet Button */}
+                                    <button
+                                        onClick={() => setRequestStep('dc')}
+                                        className="w-full p-4 bg-white rounded-2xl flex items-center gap-4 active:scale-[0.98] transition-all group border border-transparent hover:border-[#007AFF]/30 relative overflow-hidden"
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-r from-[#007AFF]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <div className="w-12 h-12 rounded-xl bg-[#007AFF]/10 flex items-center justify-center shrink-0">
+                                            <img src="/images/dc-logo.webp" alt="DC" className="w-8 h-8 object-contain" />
+                                        </div>
+                                        <div className="text-left flex-1">
+                                            <h4 className="text-[#1C1C1E] font-bold text-lg">DC Wallet</h4>
+                                            <p className="text-[#1C1C1E]/60 text-xs font-medium">Мгновенная активация</p>
+                                        </div>
+                                        <div className="bg-[#007AFF] text-white text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-wider">
+                                            AUTO
+                                        </div>
+                                    </button>
+
+                                    {/* Card Transfer Button */}
+                                    <button
+                                        onClick={() => setRequestStep('info')}
+                                        className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-4 active:scale-[0.98] transition-all group hover:bg-white/10"
+                                    >
+                                        <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                                            <div className="w-8 h-5 rounded border-2 border-white/40 relative">
+                                                <div className="absolute top-1 inset-x-0 h-[2px] bg-white/40" />
+                                            </div>
+                                        </div>
+                                        <div className="text-left flex-1">
+                                            <h4 className="text-white font-bold text-lg">Перевод на карту</h4>
+                                            <p className="text-white/40 text-xs font-medium">Проверка 5-30 минут</p>
+                                        </div>
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {requestStep === 'dc' && (
+                            <motion.div key="dc" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                <div className="bg-white rounded-[2rem] p-6 mb-6 text-[#1C1C1E]">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <img src="/images/dc-logo.webp" alt="DC" className="w-8 h-8 object-contain" />
+                                        <h3 className="font-bold text-xl tracking-tight">Оплата через DC</h3>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        {/* Amount */}
+                                        <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                                            <span className="text-gray-500 font-medium">Сумма</span>
+                                            <span className="font-black text-2xl">30 TJS</span>
+                                        </div>
+
+                                        {/* Account */}
+                                        <div className="bg-gray-50 p-4 rounded-xl space-y-2 border border-blue-100">
+                                            <div className="text-xs text-blue-500 font-bold uppercase tracking-wider">Счет получателя</div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="font-mono font-bold text-lg text-gray-800 break-all">20202972301000103797</span>
+                                            </div>
+                                            <div className="text-xs text-gray-400">Душанбе Сити</div>
+                                        </div>
+
+                                        {/* Comment Code */}
+                                        <div className="bg-blue-50 p-4 rounded-xl space-y-2 border border-blue-200">
+                                            <div className="flex items-center gap-2">
+                                                <div className="text-xs text-blue-600 font-bold uppercase tracking-wider">Ваш комментарий</div>
+                                                <div className="px-2 py-0.5 bg-red-100 text-red-600 rounded text-[10px] font-bold">ОБЯЗАТЕЛЬНО</div>
+                                            </div>
+
+                                            <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-blue-100 shadow-sm relative overflow-hidden">
+                                                <span className="font-mono font-black text-2xl text-blue-600 tracking-wider z-10">{user?.telegramId}</span>
+                                                <div className="absolute inset-0 bg-blue-50/50 z-0" />
+                                            </div>
+                                            <p className="text-xs text-blue-600/80 leading-relaxed">
+                                                При переводе укажите <span className="font-bold">число выше</span> в поле "Комментарий" (назн. платежа). Без него мы не увидим оплату!
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-8 space-y-3">
+                                        <button
+                                            onClick={handleDCVerify}
+                                            disabled={verifyingDC}
+                                            className="w-full py-4 bg-[#007AFF] text-white font-bold rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 relative overflow-hidden"
+                                        >
+                                            {verifyingDC ? (
+                                                <>
+                                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                    <span>Проверка...</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Check className="w-5 h-5" />
+                                                    <span>Я оплатил, проверить</span>
+                                                </>
+                                            )}
+                                        </button>
+                                        <button onClick={() => setRequestStep('method')} className="w-full py-3 text-gray-400 font-bold text-sm">
+                                            Назад
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
                         {requestStep === 'info' && (
                             <motion.div key="info" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                                 <div className="space-y-4 mb-8">
@@ -197,7 +331,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                         </span>
                                     </div>
                                     <button
-                                        onClick={() => setRequestStep('payment')}
+                                        onClick={() => setRequestStep('method')}
                                         className="w-full py-4 bg-[#FFD700] text-[#5C4D00] font-black text-lg rounded-2xl shadow-glow active:scale-[0.98] transition-all"
                                     >
                                         {t('subscription.connectNow', language || 'ru')}
@@ -299,7 +433,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                         >
                                             {loading ? t('subscription.sending', language || 'ru') : t('subscription.send', language || 'ru')}
                                         </button>
-                                        <button onClick={() => setRequestStep('info')} className="w-full py-2 text-white/40 text-xs font-bold uppercase tracking-widest">
+                                        <button onClick={() => setRequestStep('method')} className="w-full py-2 text-white/40 text-xs font-bold uppercase tracking-widest">
                                             {t('common.back', language || 'ru')}
                                         </button>
                                     </div>
