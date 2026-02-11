@@ -37,3 +37,4 @@ logs
 
 # Webp recordings
 *.webp
+!frontend/src/images/*.webp
