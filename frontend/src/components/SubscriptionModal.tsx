@@ -6,6 +6,7 @@ import { useStore } from '../store/useStore';
 import { requestSubscription, checkSubscriptionStatus, verifyDCPayment } from '../api';
 import { t, type Language } from '../utils/i18n';
 import confetti from 'canvas-confetti';
+import dcLogo from '../images/dc-logo.webp';
 
 interface SubscriptionModalProps {
     onClose: () => void;
@@ -194,7 +195,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-r from-[#007AFF]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                         <div className="w-12 h-12 rounded-xl bg-[#007AFF]/10 flex items-center justify-center shrink-0">
-                                            <img src="/images/dc-logo.webp" alt="DC" className="w-8 h-8 object-contain" />
+                                            <img src={dcLogo} alt="DC" className="w-8 h-8 object-contain" />
                                         </div>
                                         <div className="text-left flex-1">
                                             <h4 className="text-[#1C1C1E] font-bold text-lg">DC Wallet</h4>
@@ -228,7 +229,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                             <motion.div key="dc" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                                 <div className="bg-white rounded-[2rem] p-6 mb-6 text-[#1C1C1E]">
                                     <div className="flex items-center gap-3 mb-6">
-                                        <img src="/images/dc-logo.webp" alt="DC" className="w-8 h-8 object-contain" />
+                                        <img src={dcLogo} alt="DC" className="w-8 h-8 object-contain" />
                                         <h3 className="font-bold text-xl tracking-tight">Оплата через DC</h3>
                                     </div>
 
