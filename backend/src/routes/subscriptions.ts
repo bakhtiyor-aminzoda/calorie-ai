@@ -460,7 +460,7 @@ router.post('/alif/callback', async (req, res) => {
         return res.json({ code: 400, id, message: 'Invalid action' });
     } catch (error: any) {
         console.error('[Alif Callback] Error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.json({ code: 500, message: 'Internal server error' });
     }
 });
 
