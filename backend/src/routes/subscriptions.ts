@@ -262,12 +262,17 @@ router.post('/alif/initiate', async (req, res) => {
 // 8. Alif Bank Callback (handles check, pay, status)
 router.post('/alif/callback', async (req, res) => {
     try {
-        // Basic Auth Validation
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Basic ')) {
+        // Basic Auth Validation (support both standard "Basic <base64>" and Alif's direct "<base64>")
+        let authHeader = req.headers.authorization;
+        if (!authHeader) {
             return res.status(401).json({ code: 401, error: 'Unauthorized' });
         }
-        const credentials = Buffer.from(authHeader.substring(6), 'base64').toString('utf8');
+        
+        if (authHeader.toLowerCase().startsWith('basic ')) {
+            authHeader = authHeader.substring(6);
+        }
+        
+        const credentials = Buffer.from(authHeader, 'base64').toString('utf8');
         const [login, password] = credentials.split(':');
         
         const alifLogin = process.env.ALIF_LOGIN || 'alif_user';
