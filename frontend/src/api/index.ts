@@ -102,6 +102,11 @@ export const initiateAlifPayment = async (userId: string) => {
   return response.data;
 };
 
+export const initiateEskhataPayment = async (userId: string) => {
+  const response = await api.post<{ success: boolean; request: any; paymentUrl?: string }>('/subscriptions/eskhata/initiate', { userId });
+  return response.data;
+};
+
 export const checkSubscriptionStatus = async (userId: string) => {
   const response = await api.get<{ isPremium: boolean; lastRequestStatus: string }>('/subscriptions/status/' + userId);
   return response.data;

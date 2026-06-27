@@ -203,6 +203,10 @@ export const translations = {
     'subscription.alifMobi.openApp': 'Открыть Alif Mobi',
     'subscription.alifMobi.statusPending': 'Ожидание оплаты в приложении...',
     'subscription.alifMobi.checkStatus': 'Проверить оплату',
+    'subscription.eskhata.step1': 'Счет успешно выставлен. Откройте приложение Eskhata Online для оплаты',
+    'subscription.eskhata.openApp': 'Открыть Eskhata Online',
+    'subscription.eskhata.statusPending': 'Ожидание оплаты в приложении...',
+    'subscription.eskhata.checkStatus': 'Проверить оплату',
     // Free Plan
     'freePlan.title': 'Ваш тариф:',
     'freePlan.planName': 'Free',
@@ -420,6 +424,10 @@ export const translations = {
     'subscription.alifMobi.openApp': 'Кушодани Alif Mobi',
     'subscription.alifMobi.statusPending': 'Интизори пардохт дар замима...',
     'subscription.alifMobi.checkStatus': 'Санҷиши пардохт',
+    'subscription.eskhata.step1': 'Ҳисоб бомуваффақият гузошта шуд. Барои пардохт замимаи Eskhata Online-ро кушоед',
+    'subscription.eskhata.openApp': 'Кушодани Eskhata Online',
+    'subscription.eskhata.statusPending': 'Интизори пардохт дар замима...',
+    'subscription.eskhata.checkStatus': 'Санҷиши пардохт',
     // Free Plan
     'freePlan.title': 'Тарифи шумо:',
     'freePlan.planName': 'Free',
@@ -637,6 +645,10 @@ export const translations = {
     'subscription.alifMobi.openApp': 'Alif Mobi-ni ochish',
     'subscription.alifMobi.statusPending': 'Ilovada to‘lov kutilmoqda...',
     'subscription.alifMobi.checkStatus': 'To‘lovni tekshirish',
+    'subscription.eskhata.step1': 'Hisob muvaffaqiyatli yaratildi. Toʻlov uchun Eskhata Online ilovasini oching',
+    'subscription.eskhata.openApp': 'Eskhata Online-ni ochish',
+    'subscription.eskhata.statusPending': 'Ilovada to‘lov kutilmoqda...',
+    'subscription.eskhata.checkStatus': 'To‘lovni tekshirish',
     // Free Plan
     'freePlan.title': 'Tarifingiz:',
     'freePlan.planName': 'Free',

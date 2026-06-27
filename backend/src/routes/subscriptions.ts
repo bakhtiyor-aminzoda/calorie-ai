@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import axios from 'axios';
 import FormData from 'form-data';
+import crypto from 'crypto';
 
 // BigInt serialization fix for Prisma + JSON
 (BigInt.prototype as any).toJSON = function () { return this.toString(); };
@@ -466,6 +467,231 @@ router.post('/alif/callback', async (req, res) => {
     } catch (error: any) {
         console.error('[Alif Callback] Error:', error);
         res.json({ code: 500, message: 'Internal server error' });
+    }
+});
+
+// Helper for Eskhata Bank Fast-Pay Hashing (HMAC SHA-256)
+function generateEskhataHash(params: string[], hashKey: string): string {
+    const paramsValues = params.join('');
+    const hashString = `${paramsValues}.${hashKey}`;
+    return crypto.createHash('sha256').update(hashString).digest('hex');
+}
+
+// 9. Initiate Eskhata Bank payment request
+router.post('/eskhata/initiate', async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ error: 'User ID required' });
+
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        // Create PENDING request in database
+        const request = await prisma.paymentRequest.create({
+            data: {
+                userId,
+                amount: 30, // 30 TJS
+                status: 'PENDING',
+                currency: 'TJS',
+                receiptUrl: 'eskhata'
+            }
+        });
+
+        const invoiceId = request.id;
+        const amountStr = "30.00"; // Always exactly two decimals
+        const currencyStr = "972"; // TJS ISO 4217
+        const posIdStr = String(process.env.ESKHATA_POS_ID || '0');
+        const orderTypeIdStr = "2"; // Invoicing
+        const hashKey = process.env.ESKHATA_HASH_KEY || 'test_hash_key';
+
+        // Hashing string: invoiceId + amount + currency + posId + orderTypeId + "." + HashKey
+        const hashValue = generateEskhataHash([invoiceId, amountStr, currencyStr, posIdStr, orderTypeIdStr], hashKey);
+
+        const eskhataApiUrl = process.env.ESKHATA_API_URL || 'https://sandbox.eskhata.tj';
+        const companyIdBase64 = Buffer.from(process.env.ESKHATA_COMPANY_ID || 'test_company').toString('base64');
+
+        console.log(`[Eskhata Initiate] Calling Eskhata create API for request ${invoiceId}`);
+        
+        try {
+            const response = await axios.post(`${eskhataApiUrl}/merchant/api/v1/orders/create`, {
+                hash: hashValue,
+                invoiceId,
+                amount: 30.00,
+                currency: currencyStr,
+                posId: Number(posIdStr),
+                orderTypeId: 2
+            }, {
+                headers: {
+                    'X-CompanyId': companyIdBase64,
+                    'Content-Type': 'application/json'
+                },
+                timeout: 10000
+            });
+
+            const resData = response.data;
+            if (resData && resData.status === true && resData.data) {
+                const orderId = resData.data.orderId;
+                const paymentUrl = resData.data.qr || resData.data.url; // Support both just in case
+
+                // Update request with Eskhata orderId and payment link
+                await prisma.paymentRequest.update({
+                    where: { id: invoiceId },
+                    data: {
+                        transactionId: String(orderId),
+                        receiptUrl: paymentUrl
+                    }
+                });
+
+                console.log(`[Eskhata Initiate] Order created successfully: orderId=${orderId}, url=${paymentUrl}`);
+                return res.json({ success: true, request, paymentUrl });
+            } else {
+                console.error(`[Eskhata Initiate] API Error:`, resData);
+                // Reject payment request in DB
+                await prisma.paymentRequest.update({
+                    where: { id: invoiceId },
+                    data: { status: 'REJECTED' }
+                });
+                return res.status(400).json({ error: resData?.message || 'Eskhata order creation failed' });
+            }
+        } catch (apiError: any) {
+            console.error(`[Eskhata Initiate] API request failed:`, apiError.response?.data || apiError.message);
+            // Reject payment request in DB
+            await prisma.paymentRequest.update({
+                where: { id: invoiceId },
+                data: { status: 'REJECTED' }
+            });
+            return res.status(500).json({ error: 'Failed to communicate with Eskhata Bank' });
+        }
+    } catch (error: any) {
+        console.error('[Eskhata Initiate] Unexpected Error:', error);
+        res.status(500).json({ error: 'Internal error' });
+    }
+});
+
+// 10. Eskhata Bank Callback (Webhook)
+router.post('/eskhata/callback', async (req, res) => {
+    try {
+        const { status, data } = req.body;
+        console.log(`[Eskhata Callback] Received webhook:`, JSON.stringify(req.body));
+
+        if (!data || !data.invoiceId || !data.orderId) {
+            return res.json({ status: false, code: -2, message: 'Invalid webhook parameters' });
+        }
+
+        const invoiceId = data.invoiceId;
+        const orderId = data.orderId;
+
+        // Find the payment request in our database
+        const paymentRequest = await prisma.paymentRequest.findUnique({
+            where: { id: invoiceId },
+            include: { user: true }
+        });
+
+        if (!paymentRequest) {
+            return res.json({ status: false, code: -1, message: 'Order not found' });
+        }
+
+        if (paymentRequest.status === 'APPROVED') {
+            console.log(`[Eskhata Callback] Order ${invoiceId} already approved (duplicate webhook).`);
+            return res.json({ status: true, code: 1, message: 'Дублирование запроса' });
+        }
+
+        // Verify transaction status directly via Eskhata status check API
+        const eskhataApiUrl = process.env.ESKHATA_API_URL || 'https://sandbox.eskhata.tj';
+        const companyIdBase64 = Buffer.from(process.env.ESKHATA_COMPANY_ID || 'test_company').toString('base64');
+        const hashKey = process.env.ESKHATA_HASH_KEY || 'test_hash_key';
+        const posIdStr = String(process.env.ESKHATA_POS_ID || '0');
+        const amountStr = "30.00";
+        const currencyStr = "972";
+
+        // Hashing string for status check: invoiceId + orderId + amount + currency + posId + "." + HashKey
+        const statusHash = generateEskhataHash([invoiceId, orderId, amountStr, currencyStr, posIdStr], hashKey);
+
+        try {
+            console.log(`[Eskhata Callback] Verifying status for order ${orderId} (invoice: ${invoiceId})`);
+            const verifyRes = await axios.post(`${eskhataApiUrl}/merchant/api/v1/orders/status`, {
+                hash: statusHash,
+                invoiceId,
+                orderId,
+                amount: 30.00,
+                currency: currencyStr,
+                posId: Number(posIdStr)
+            }, {
+                headers: {
+                    'X-CompanyId': companyIdBase64,
+                    'Content-Type': 'application/json'
+                },
+                timeout: 10000
+            });
+
+            const verifyData = verifyRes.data;
+            if (verifyData && verifyData.status === true && verifyData.data && verifyData.data.orderStatus === 'COMPLETED') {
+                const expiresAt = new Date();
+                expiresAt.setDate(expiresAt.getDate() + 90);
+
+                // Update database: Approve payment and activate Premium
+                await prisma.$transaction([
+                    prisma.paymentRequest.update({
+                        where: { id: invoiceId },
+                        data: {
+                            status: 'APPROVED',
+                            transactionId: String(orderId)
+                        }
+                    }),
+                    prisma.user.update({
+                        where: { id: paymentRequest.userId },
+                        data: {
+                            isPremium: true,
+                            subscriptionExpiresAt: expiresAt
+                        }
+                    })
+                ]);
+
+                console.log(`[Eskhata Callback] Premium activated successfully for user ${paymentRequest.userId}`);
+
+                const user = paymentRequest.user;
+
+                // Notify User via Bot
+                if (BOT_TOKEN && user.telegramId) {
+                    await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        chat_id: user.telegramId.toString(),
+                        text: `🎉 *Поздравляем! Ваш Premium активирован!* 🎉\n\nВаша оплата через *Eskhata Pay* на сумму *30 TJS* была успешно проведена.\n\nТеперь у вас есть безлимитный доступ ко всем функциям на 90 дней. Приятного аппетита! 🍏`,
+                        parse_mode: 'Markdown'
+                    }).catch(err => console.error('[Eskhata Notification] Failed to notify user:', err.message));
+                }
+
+                // Notify Admin via Bot
+                if (BOT_TOKEN && user.telegramId) {
+                    const ADMIN_TG_ID = "7179785109";
+                    const userLine = user.username ? `@${user.username}` : user.firstName || 'User';
+                    const phoneLine = user.phoneNumber ? `📱 Телефон: \`${user.phoneNumber}\`\n` : '';
+                    const profileLink = `tg://user?id=${user.telegramId}`;
+
+                    await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        chat_id: ADMIN_TG_ID,
+                        text: `✅ *Новая оплата через Eskhata Pay!*\n\n` +
+                            `👤 Клиент: [${userLine}](${profileLink})\n` +
+                            `${phoneLine}` +
+                            `🆔 ID: \`${user.telegramId}\`\n` +
+                            `💰 Сумма: *30 TJS*\n` +
+                            `📄 Транзакция Eskhata: \`${orderId}\`\n\n` +
+                            `✨ Премиум активирован автоматически на 3 месяца.`,
+                        parse_mode: 'Markdown'
+                    }).catch(err => console.error('[Eskhata Admin Notification] Failed to notify admin:', err.message));
+                }
+
+                return res.json({ status: true, code: 0, message: 'Успешно' });
+            } else {
+                console.warn(`[Eskhata Callback] Status verification failed or order not completed:`, verifyData);
+                return res.json({ status: false, code: -2, message: 'Order status verification failed' });
+            }
+        } catch (verifyError: any) {
+            console.error(`[Eskhata Callback] Status verification request failed:`, verifyError.response?.data || verifyError.message);
+            return res.json({ status: false, code: -6, message: 'Failed to verify transaction with Eskhata' });
+        }
+    } catch (error: any) {
+        console.error('[Eskhata Callback] Webhook handler error:', error);
+        res.json({ status: false, code: -6, message: 'Internal server error' });
     }
 });
 

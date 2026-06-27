@@ -3,10 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Star, Zap, Shield, Crown, Image as ImageIcon, Upload, Copy } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { requestSubscription, checkSubscriptionStatus, initiateAlifPayment } from '../api';
+import { requestSubscription, checkSubscriptionStatus, initiateAlifPayment, initiateEskhataPayment } from '../api';
 import { t, type Language } from '../utils/i18n';
 import confetti from 'canvas-confetti';
 import alifLogo from '../images/alif-logo.svg';
+import eskhataLogo from '../images/eskhata-logo.svg';
 
 interface SubscriptionModalProps {
     onClose: () => void;
@@ -19,8 +20,10 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
     const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
     const [phoneNumber, setPhoneNumber] = useState('');
     const [status, setStatus] = useState<string>('NONE'); // NONE, PENDING, REJECTED, APPROVED
-    const [requestStep, setRequestStep] = useState<'method' | 'info' | 'payment' | 'alif' | 'success'>('method');
+    const [requestStep, setRequestStep] = useState<'method' | 'info' | 'payment' | 'alif' | 'eskhata' | 'success'>('method');
     const [verifyingAlif, setVerifyingAlif] = useState(false);
+    const [verifyingEskhata, setVerifyingEskhata] = useState(false);
+    const [eskhataPaymentUrl, setEskhataPaymentUrl] = useState('');
     const [copied, setCopied] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -120,10 +123,15 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
     };
 
 
-    // Auto-polling for Alif Mobi payment completion
+    // Auto-polling for Alif Mobi / Eskhata Pay payment completion
     useEffect(() => {
         let intervalId: any;
-        if (requestStep === 'alif' && user) {
+        const isPollingStep = requestStep === 'alif' || requestStep === 'eskhata';
+        if (isPollingStep && user) {
+            const confColors = requestStep === 'alif'
+                ? ['#FFD700', '#2ebd59', '#ffffff'] // Gold, Green (Alif), White
+                : ['#FFD700', '#0F55A5', '#E21E26']; // Gold, Blue, Red (Eskhata)
+
             // Check immediately
             checkSubscriptionStatus(user.id).then(data => {
                 if (data.isPremium) {
@@ -132,7 +140,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                         particleCount: 150,
                         spread: 70,
                         origin: { y: 0.6 },
-                        colors: ['#FFD700', '#2ebd59', '#ffffff'] // Gold, Green (Alif), White
+                        colors: confColors
                     });
                 }
             }).catch(() => {});
@@ -145,7 +153,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                             particleCount: 150,
                             spread: 70,
                             origin: { y: 0.6 },
-                            colors: ['#FFD700', '#2ebd59', '#ffffff']
+                            colors: confColors
                         });
                     }
                 }).catch(() => {});
@@ -191,6 +199,65 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
             alert('Ошибка при проверке статуса подписки');
         } finally {
             setVerifyingAlif(false);
+        }
+    };
+
+    const handleSelectEskhata = async () => {
+        if (!user) return;
+        setLoading(true);
+        try {
+            const result = await initiateEskhataPayment(user.id);
+            if (result.success && result.paymentUrl) {
+                setEskhataPaymentUrl(result.paymentUrl);
+                setStatus('PENDING');
+                setRequestStep('eskhata');
+                
+                // Automatically open link
+                if (window.Telegram?.WebApp?.openLink) {
+                    window.Telegram.WebApp.openLink(result.paymentUrl);
+                } else {
+                    window.open(result.paymentUrl, '_blank');
+                }
+            } else {
+                alert('Не удалось получить ссылку на оплату от Eskhata Bank');
+            }
+        } catch (error) {
+            console.error('Failed to initiate Eskhata payment:', error);
+            alert('Не удалось инициализировать оплату через Eskhata Pay');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleEskhataVerify = async () => {
+        if (!user) return;
+        setVerifyingEskhata(true);
+        try {
+            const data = await checkSubscriptionStatus(user.id);
+            if (data.isPremium) {
+                setRequestStep('success');
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#FFD700', '#0F55A5', '#E21E26']
+                });
+            } else {
+                alert('Оплата еще обрабатывается банком. Пожалуйста, подождите или попробуйте позже.');
+            }
+        } catch (error) {
+            alert('Ошибка при проверке статуса подписки');
+        } finally {
+            setVerifyingEskhata(false);
+        }
+    };
+
+    const handleOpenEskhata = () => {
+        if (!eskhataPaymentUrl) return;
+        if (window.Telegram?.WebApp?.openLink) {
+            window.Telegram.WebApp.openLink(eskhataPaymentUrl);
+        } else {
+            window.open(eskhataPaymentUrl, '_blank');
         }
     };
 
@@ -282,6 +349,24 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                             <p className="text-[#1C1C1E]/60 text-xs font-medium">Мгновенная активация</p>
                                         </div>
                                         <div className="bg-[#2ebd59] text-white text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-wider">
+                                            AUTO
+                                        </div>
+                                    </button>
+
+                                    {/* Eskhata Pay Button */}
+                                    <button
+                                        onClick={handleSelectEskhata}
+                                        className="w-full p-4 bg-white rounded-2xl flex items-center gap-4 active:scale-[0.98] transition-all group border border-transparent hover:border-[#0F55A5]/30 relative overflow-hidden"
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-r from-[#0F55A5]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <div className="w-12 h-12 rounded-xl bg-[#0F55A5]/10 flex items-center justify-center shrink-0">
+                                            <img src={eskhataLogo} alt="Eskhata" className="w-10 h-10 object-contain" />
+                                        </div>
+                                        <div className="text-left flex-1">
+                                            <h4 className="text-[#1C1C1E] font-bold text-lg">Eskhata Pay</h4>
+                                            <p className="text-[#1C1C1E]/60 text-xs font-medium">Оплата в приложении</p>
+                                        </div>
+                                        <div className="bg-[#0F55A5] text-white text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-wider">
                                             AUTO
                                         </div>
                                     </button>
@@ -378,6 +463,67 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                                 <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
                                             ) : null}
                                             <span>{t('subscription.alifMobi.checkStatus', language || 'ru')}</span>
+                                        </button>
+
+                                        <button onClick={() => setRequestStep('method')} className="w-full py-2 text-gray-400 font-bold text-sm">
+                                            {t('common.back', language || 'ru')}
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {requestStep === 'eskhata' && (
+                            <motion.div key="eskhata" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                <div className="bg-white rounded-[2rem] p-6 mb-6 text-[#1C1C1E]">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-10 h-10 rounded-xl bg-[#0F55A5]/10 flex items-center justify-center shrink-0">
+                                            <img src={eskhataLogo} alt="Eskhata" className="w-8 h-8 object-contain" />
+                                        </div>
+                                        <h3 className="font-bold text-xl tracking-tight">Eskhata Online</h3>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        {/* Amount */}
+                                        <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                                            <span className="text-gray-500 font-medium">Сумма к оплате</span>
+                                            <span className="font-black text-2xl text-[#0F55A5]">30 TJS</span>
+                                        </div>
+
+                                        {/* Instructions */}
+                                        <div className="space-y-2 text-sm text-gray-600 leading-relaxed">
+                                            <div className="flex gap-3">
+                                                <div className="w-5 h-5 rounded-full bg-[#0F55A5]/10 text-[#0F55A5] flex items-center justify-center shrink-0 font-bold text-xs mt-0.5">1</div>
+                                                <p>{t('subscription.eskhata.step1', language || 'ru')}</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Status indicator */}
+                                        <div className="flex items-center gap-3 bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                                            <div className="w-2.5 h-2.5 bg-yellow-500 rounded-full animate-pulse" />
+                                            <span className="text-xs font-semibold text-yellow-700">
+                                                {t('subscription.eskhata.statusPending', language || 'ru')}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-8 space-y-3">
+                                        <button
+                                            onClick={handleOpenEskhata}
+                                            className="w-full py-4 bg-[#0F55A5] text-white font-bold rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 hover:bg-[#0b3e7a]"
+                                        >
+                                            <span>{t('subscription.eskhata.openApp', language || 'ru')}</span>
+                                        </button>
+                                        
+                                        <button
+                                            onClick={handleEskhataVerify}
+                                            disabled={verifyingEskhata}
+                                            className="w-full py-3 border border-gray-200 text-gray-700 font-bold rounded-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 hover:bg-gray-50"
+                                        >
+                                            {verifyingEskhata ? (
+                                                <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                                            ) : null}
+                                            <span>{t('subscription.eskhata.checkStatus', language || 'ru')}</span>
                                         </button>
 
                                         <button onClick={() => setRequestStep('method')} className="w-full py-2 text-gray-400 font-bold text-sm">

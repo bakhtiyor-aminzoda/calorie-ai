@@ -1,0 +1,9 @@
+<svg width="120" height="36" viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(0, 2)">
+    <circle cx="16" cy="16" r="14" fill="#F0F4FA"/>
+    <path d="M12 10C12 9.44772 12.4477 9 13 9H19C19.5523 9 20 9.44772 20 10C20 10.5523 19.5523 11 19 11H14V14H18C18.5523 14 19 14.4477 19 15C19 15.5523 18.5523 16 18 16H14V19H19C19.5523 19 20 19.4477 20 20C20 20.5523 19.5523 21 19 21H13C12.4477 21 12 20.5523 12 20V10Z" fill="#0F55A5"/>
+    <path d="M22 10C23.5 12.5 23.5 15.5 22 18L24 21C26.5 17.5 26.5 13.5 24 10H22Z" fill="#E21E26"/>
+  </g>
+  <text x="36" y="23" fill="#0F55A5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="15" letter-spacing="-0.5px">eskhata</text>
+  <text x="94" y="23" fill="#E21E26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="15" letter-spacing="-0.5px">pay</text>
+</svg>
