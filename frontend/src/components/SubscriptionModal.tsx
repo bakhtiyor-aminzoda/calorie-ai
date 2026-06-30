@@ -272,20 +272,12 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
     };
 
     const handleOpenAlifMobi = () => {
-        const deepLink = 'alifmobi://';
-        const fallbackWeb = 'https://alif.mobi';
-
-        // Try using Telegram's WebApp openLink if available
+        if (!user) return;
+        const paymentUrl = `https://app.alif.tj/providers?id=6970&amount=30&account=${user.telegramId}`;
         if (window.Telegram?.WebApp?.openLink) {
-            window.location.href = deepLink;
-            setTimeout(() => {
-                window.Telegram!.WebApp!.openLink(fallbackWeb);
-            }, 1000);
+            window.Telegram.WebApp.openLink(paymentUrl);
         } else {
-            window.location.href = deepLink;
-            setTimeout(() => {
-                window.open(fallbackWeb, '_blank');
-            }, 1000);
+            window.open(paymentUrl, '_blank');
         }
     };
 
