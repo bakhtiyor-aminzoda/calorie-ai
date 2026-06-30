@@ -7,7 +7,7 @@ import { requestSubscription, checkSubscriptionStatus, initiateAlifPayment, init
 import { t, type Language } from '../utils/i18n';
 import confetti from 'canvas-confetti';
 import alifLogo from '../images/alif-logo.svg';
-import eskhataLogo from '../images/eskhata-logo.svg';
+import eskhataLogo from '../images/eskhata-logo.png';
 
 interface SubscriptionModalProps {
     onClose: () => void;
@@ -24,6 +24,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
     const [verifyingAlif, setVerifyingAlif] = useState(false);
     const [verifyingEskhata, setVerifyingEskhata] = useState(false);
     const [eskhataPaymentUrl, setEskhataPaymentUrl] = useState('');
+    const [alifInvoiceId, setAlifInvoiceId] = useState('');
     const [copied, setCopied] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -168,7 +169,8 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
         if (!user) return;
         setLoading(true);
         try {
-            await initiateAlifPayment(user.id);
+            const result = await initiateAlifPayment(user.id);
+            setAlifInvoiceId(result.invoiceId);
             setStatus('PENDING');
             setRequestStep('alif');
         } catch (error) {
@@ -262,8 +264,8 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
     };
 
     const handleCopyId = () => {
-        if (!user) return;
-        navigator.clipboard.writeText(user.telegramId.toString()).then(() => {
+        if (!alifInvoiceId) return;
+        navigator.clipboard.writeText(alifInvoiceId).then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         }).catch(() => {});
@@ -432,7 +434,7 @@ export default function SubscriptionModal({ onClose }: SubscriptionModalProps) {
                                                 onClick={handleCopyId}
                                                 className="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-200 shadow-sm cursor-pointer active:scale-[0.98] transition-all hover:bg-gray-50"
                                             >
-                                                <span className="font-mono font-black text-2xl text-gray-800 tracking-wider">{user?.telegramId}</span>
+                                                <span className="font-mono font-black text-2xl text-gray-800 tracking-wider">{alifInvoiceId}</span>
                                                 <Copy className="w-5 h-5 text-gray-400" />
                                             </div>
                                         </div>

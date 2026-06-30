@@ -98,7 +98,7 @@ export const requestSubscription = async (userId: string, receipt: File, phoneNu
 
 
 export const initiateAlifPayment = async (userId: string) => {
-  const response = await api.post<{ success: boolean; request: any }>('/subscriptions/alif/initiate', { userId });
+  const response = await api.post<{ success: boolean; request: any; invoiceId: string }>('/subscriptions/alif/initiate', { userId });
   return response.data;
 };
 

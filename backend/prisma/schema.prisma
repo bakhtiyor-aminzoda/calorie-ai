@@ -42,6 +42,7 @@ model User {
 model PaymentRequest {
   id            String        @id @default(uuid())
   userId        String
+  invoiceId     String?       @unique
   transactionId String?
   receiptUrl    String?
   status        PaymentStatus @default(PENDING)

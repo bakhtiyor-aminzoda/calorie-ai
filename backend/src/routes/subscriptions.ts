@@ -233,6 +233,12 @@ router.post('/reject', async (req, res) => {
 });
 
 // 7. Initiate Alif Mobi payment request (sets status to PENDING)
+function generateInvoiceId(): string {
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(100000 + Math.random() * 900000).toString();
+    return timestamp + random;
+}
+
 router.post('/alif/initiate', async (req, res) => {
     try {
         const { userId } = req.body;
@@ -241,19 +247,27 @@ router.post('/alif/initiate', async (req, res) => {
         const user = await prisma.user.findUnique({ where: { id: userId } });
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        // Create a PENDING request
+        let invoiceId = generateInvoiceId();
+        // Ensure uniqueness
+        let existing = await prisma.paymentRequest.findUnique({ where: { invoiceId } });
+        while (existing) {
+            invoiceId = generateInvoiceId();
+            existing = await prisma.paymentRequest.findUnique({ where: { invoiceId } });
+        }
+
         const request = await prisma.paymentRequest.create({
             data: {
                 userId,
-                amount: 30, // 30 TJS
+                invoiceId,
+                amount: 30,
                 status: 'PENDING',
                 currency: 'TJS',
                 receiptUrl: 'alif_mobi'
             }
         });
 
-        console.log(`[Alif Initiate] Created PENDING payment request ${request.id} for user ${userId}`);
-        res.json({ success: true, request });
+        console.log(`[Alif Initiate] Created PENDING payment request ${request.id} (invoice: ${invoiceId}) for user ${userId}`);
+        res.json({ success: true, request, invoiceId });
     } catch (error: any) {
         console.error('[Alif Initiate] Error:', error);
         res.status(500).json({ error: 'Internal error' });
@@ -295,18 +309,16 @@ router.post('/alif/callback', async (req, res) => {
                 return res.json({ code: 400, id, message: 'Account or ID missing' });
             }
 
-            let user;
-            try {
-                user = await prisma.user.findUnique({
-                    where: { telegramId: BigInt(account) }
-                });
-            } catch (err) {
-                return res.json({ code: 400, id, message: 'Invalid account format' });
+            const paymentRequest = await prisma.paymentRequest.findUnique({
+                where: { invoiceId: account },
+                include: { user: true }
+            });
+
+            if (!paymentRequest) {
+                return res.json({ code: 404, id, message: 'Invoice not found' });
             }
 
-            if (!user) {
-                return res.json({ code: 404, id, message: 'User not found' });
-            }
+            const user = paymentRequest.user;
 
             return res.json({
                 code: 302,
@@ -322,18 +334,16 @@ router.post('/alif/callback', async (req, res) => {
                 return res.json({ code: 400, id, message: 'Missing parameters' });
             }
 
-            let user;
-            try {
-                user = await prisma.user.findUnique({
-                    where: { telegramId: BigInt(account) }
-                });
-            } catch (err) {
-                return res.json({ code: 400, id, message: 'Invalid account format' });
+            const paymentRequest = await prisma.paymentRequest.findUnique({
+                where: { invoiceId: account },
+                include: { user: true }
+            });
+
+            if (!paymentRequest) {
+                return res.json({ code: 404, id, message: 'Invoice not found' });
             }
 
-            if (!user) {
-                return res.json({ code: 404, id, message: 'User not found' });
-            }
+            const user = paymentRequest.user;
 
             const payAmount = parseFloat(amount);
             if (isNaN(payAmount) || payAmount < 30) {
@@ -357,41 +367,17 @@ router.post('/alif/callback', async (req, res) => {
                 });
             }
 
-            // Find matching PENDING request to approve
-            const pendingRequest = await prisma.paymentRequest.findFirst({
-                where: {
-                    userId: user.id,
-                    status: 'PENDING',
-                    receiptUrl: 'alif_mobi'
-                },
-                orderBy: { createdAt: 'desc' }
-            });
-
             const expiresAt = new Date();
             expiresAt.setDate(expiresAt.getDate() + 90);
 
-            let updatedRequest;
-            if (pendingRequest) {
-                updatedRequest = await prisma.paymentRequest.update({
-                    where: { id: pendingRequest.id },
-                    data: {
-                        status: 'APPROVED',
-                        transactionId: String(id),
-                        amount: Math.round(payAmount)
-                    }
-                });
-            } else {
-                updatedRequest = await prisma.paymentRequest.create({
-                    data: {
-                        userId: user.id,
-                        amount: Math.round(payAmount),
-                        status: 'APPROVED',
-                        currency: 'TJS',
-                        transactionId: String(id),
-                        receiptUrl: 'alif_mobi'
-                    }
-                });
-            }
+            const updatedRequest = await prisma.paymentRequest.update({
+                where: { id: paymentRequest.id },
+                data: {
+                    status: 'APPROVED',
+                    transactionId: String(id),
+                    amount: Math.round(payAmount)
+                }
+            });
 
             // Activate Premium
             await prisma.user.update({
@@ -399,7 +385,7 @@ router.post('/alif/callback', async (req, res) => {
                 data: { isPremium: true, subscriptionExpiresAt: expiresAt }
             });
 
-            console.log(`[Alif Pay] Success: Activated Premium for user ${user.id} (TG: ${user.telegramId}), transaction ${id}`);
+            console.log(`[Alif Pay] Success: Activated Premium for user ${user.id} (TG: ${user.telegramId}), invoice ${account}, transaction ${id}`);
 
             // Notify User via Bot
             if (BOT_TOKEN) {
@@ -423,7 +409,8 @@ router.post('/alif/callback', async (req, res) => {
                     text: `✅ *Новая оплата через Alif Mobi!*\n\n` +
                         `👤 Клиент: [${userLine}](${profileLink})\n` +
                         `${phoneLine}` +
-                        `🆔 ID: \`${user.telegramId}\`\n` +
+                        `🆔 TG ID: \`${user.telegramId}\`\n` +
+                        `🧾 Счет: \`${account}\`\n` +
                         `💰 Сумма: *${payAmount} TJS*\n` +
                         `📄 Транзакция Alif: \`${id}\`\n\n` +
                         `✨ Премиум активирован автоматически на 3 месяца.`,
@@ -452,9 +439,9 @@ router.post('/alif/callback', async (req, res) => {
                 return res.json({ code: 104, id, message: 'Transaction not found' });
             }
 
-            let code = 201; // В обработке
-            if (request.status === 'APPROVED') code = 200; // Успешно
-            if (request.status === 'REJECTED') code = 203; // Отклонен
+            let code = 201;
+            if (request.status === 'APPROVED') code = 200;
+            if (request.status === 'REJECTED') code = 203;
 
             return res.json({
                 code,
