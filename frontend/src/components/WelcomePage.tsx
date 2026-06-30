@@ -5,6 +5,7 @@ import { memo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { t } from '../utils/i18n';
 import logoAmini from '../images/logo-amini.jpeg';
+import calorieAiLogo from '../images/calorie-ai-logo.png';
 
 interface WelcomePageProps {
     onStart: () => void;
@@ -49,10 +50,12 @@ const WelcomePage = ({ onStart }: WelcomePageProps) => {
                             style={{ willChange: 'transform, opacity' }}
                             className="relative"
                         >
-                            <div className="absolute inset-0 bg-brand-500 blur-2xl opacity-10" />
-                            <div className="relative w-28 h-28 bg-brand-500 rounded-[2.5rem] flex items-center justify-center shadow-2xl">
-                                <Sparkles className="w-14 h-14 text-white" />
-                            </div>
+                            <div className="absolute inset-0 bg-brand-500 blur-2xl opacity-15" />
+                            <img
+                                src={calorieAiLogo}
+                                alt="Calorie AI Logo"
+                                className="relative w-28 h-28 rounded-[2.5rem] object-cover shadow-2xl border-2 border-white/20 dark:border-white/10"
+                            />
                         </motion.div>
 
                         <motion.div
