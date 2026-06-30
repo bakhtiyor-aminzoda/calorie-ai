@@ -296,7 +296,12 @@ router.post('/alif/callback', async (req, res) => {
             return res.status(401).json({ code: 401, error: 'Unauthorized' });
         }
 
-        const { action, id, account, amount } = req.body;
+        // Parse from raw body to preserve BigInt precision in 'id' field
+        const rawBody: string | undefined = (req as any).rawBody;
+        const parsedBody: any = rawBody ? JSON.parse(rawBody, (_key, value) =>
+            typeof value === 'number' && !Number.isSafeInteger(value) ? String(value) : value
+        ) : req.body;
+        const { action, id, account, amount } = parsedBody;
         console.log(`[Alif Callback] Received: action=${action}, id=${id}, account=${account}, amount=${amount}`);
 
         if (!action) {
